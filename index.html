@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Specifier Strategy | Bathware Market Penetration</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2C3E50;
+            --accent: #8B7355;
+            --sage: #9CAF88;
+            --sand: #D4C5B5;
+            --cream: #FAF8F5;
+            --charcoal: #1A1A1A;
+            --light-gray: #F5F3F0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--cream);
+            color: var(--charcoal);
+            line-height: 1.7;
+        }
+
+        .slide {
+            min-height: 100vh;
+            padding: 80px 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            border-bottom: 1px solid var(--sand);
+        }
+
+        .slide-hero {
+            background: linear-gradient(135deg, var(--primary) 0%, #1a2a3a 100%);
+            color: white;
+            text-align: center;
+        }
+
+        .slide-hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 4.5rem;
+            font-weight: 400;
+            letter-spacing: -0.02em;
+            margin-bottom: 24px;
+        }
+
+        .slide-hero .subtitle {
+            font-size: 1.4rem;
+            font-weight: 300;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto 48px;
+        }
+
+        .slide-hero .date {
+            font-size: 0.9rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            opacity: 0.7;
+        }
+
+        h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem;
+            font-weight: 400;
+            margin-bottom: 48px;
+            color: var(--primary);
+        }
+
+        h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 500;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            padding: 48px;
+            border-radius: 4px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+
+        .card-number {
+            font-family: 'Playfair Display', serif;
+            font-size: 4rem;
+            color: var(--sand);
+            line-height: 1;
+            margin-bottom: 16px;
+        }
+
+        .card h3 {
+            margin-bottom: 16px;
+        }
+
+        .card p {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .timeline {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--sand);
+            transform: translateX(-50%);
+        }
+
+        .timeline-item {
+            display: flex;
+            margin-bottom: 60px;
+            position: relative;
+        }
+
+        .timeline-item:nth-child(odd) {
+            flex-direction: row-reverse;
+        }
+
+        .timeline-content {
+            width: 45%;
+            background: white;
+            padding: 40px;
+            border-radius: 4px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+        }
+
+        .timeline-marker {
+            position: absolute;
+            left: 50%;
+            top: 40px;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
+            background: var(--accent);
+            border-radius: 50%;
+            border: 4px solid var(--cream);
+        }
+
+        .phase-tag {
+            display: inline-block;
+            padding: 8px 20px;
+            background: var(--sage);
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            border-radius: 2px;
+            margin-bottom: 16px;
+        }
+
+        .phase-tag.foundation { background: var(--primary); }
+        .phase-tag.growth { background: var(--accent); }
+        .phase-tag.scale { background: var(--sage); }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 32px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 48px 24px;
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+        }
+
+        .stat-number {
+            font-family: 'Playfair Display', serif;
+            font-size: 4rem;
+            color: var(--accent);
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .checklist {
+            list-style: none;
+        }
+
+        .checklist li {
+            padding: 12px 0;
+            padding-left: 36px;
+            position: relative;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .checklist li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--sage);
+            font-weight: 600;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            max-width: 1200px;
+            margin: 0 auto;
+            align-items: center;
+        }
+
+        .highlight-box {
+            background: var(--primary);
+            color: white;
+            padding: 48px;
+            border-radius: 4px;
+        }
+
+        .highlight-box h3 {
+            color: white;
+            margin-bottom: 24px;
+        }
+
+        .highlight-box ul {
+            list-style: none;
+        }
+
+        .highlight-box li {
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            font-weight: 300;
+        }
+
+        .budget-table {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            border-collapse: collapse;
+        }
+
+        .budget-table th {
+            background: var(--primary);
+            color: white;
+            padding: 20px;
+            text-align: left;
+            font-weight: 500;
+        }
+
+        .budget-table td {
+            padding: 20px;
+            border-bottom: 1px solid var(--light-gray);
+            background: white;
+        }
+
+        .budget-table tr:hover td {
+            background: var(--light-gray);
+        }
+
+        .total-row td {
+            font-weight: 600;
+            background: var(--sand) !important;
+        }
+
+        nav {
+            position: fixed;
+            right: 40px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+        }
+
+        nav a {
+            display: block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--sand);
+            margin: 12px 0;
+            transition: all 0.3s ease;
+        }
+
+        nav a:hover, nav a.active {
+            background: var(--accent);
+            transform: scale(1.3);
+        }
+
+        .cta-section {
+            background: var(--primary);
+            color: white;
+            text-align: center;
+        }
+
+        .cta-section h2 {
+            color: white;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 20px 48px;
+            background: white;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            margin-top: 32px;
+        }
+
+        .cta-button:hover {
+            background: var(--sand);
+            transform: translateY(-2px);
+        }
+
+        .problem-highlight {
+            background: linear-gradient(to right, var(--sand) 0%, transparent 100%);
+            padding: 32px 40px;
+            border-left: 4px solid var(--accent);
+            margin: 24px 0;
+            font-size: 1.1rem;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-top: 32px;
+        }
+
+        .kpi-item {
+            background: var(--light-gray);
+            padding: 24px;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .kpi-value {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            color: var(--accent);
+        }
+
+        .kpi-label {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 8px;
+        }
+
+        @media (max-width: 968px) {
+            .slide { padding: 60px 32px; }
+            .slide-hero h1 { font-size: 2.8rem; }
+            h2 { font-size: 2.2rem; }
+            .two-column { grid-template-columns: 1fr; gap: 40px; }
+            .stat-grid { grid-template-columns: repeat(2, 1fr); }
+            .timeline::before { left: 20px; }
+            .timeline-content { width: 85%; margin-left: auto; }
+            .timeline-marker { left: 20px; }
+            nav { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="#hero" title="Home"></a>
+    <a href="#challenge" title="Challenge"></a>
+    <a href="#strategy" title="Strategy"></a>
+    <a href="#timeline" title="Timeline"></a>
+    <a href="#tactics" title="Tactics"></a>
+    <a href="#digital" title="Digital"></a>
+    <a href="#budget" title="Budget"></a>
+    <a href="#kpis" title="KPIs"></a>
+    <a href="#action" title="Action"></a>
+</nav>
+
+<!-- Hero -->
+<section class="slide slide-hero" id="hero">
+    <h1>Specifier Strategy</h1>
+    <p class="subtitle">A 12-month strategic plan to penetrate the architect and interior designer market for premium bathware specification</p>
+    <p class="date">January 2026</p>
+</section>
+
+<!-- The Challenge -->
+<section class="slide" id="challenge">
+    <h2>The Challenge</h2>
+    <div class="two-column">
+        <div>
+            <div class="problem-highlight">
+                <strong>Core Problem:</strong> Inability to effectively penetrate the specifier market (architects and interior designers), limiting access to high-value commercial and residential projects.
+            </div>
+            <p style="margin: 24px 0; color: #666;">
+                While successful in direct-to-consumer and builder sales, the company lacks a systematic approach to engage the influential specifier segment that dictates purchasing decisions on major projects.
+            </p>
+            <p style="color: #666;">
+                The large number of architecture and design firms makes traditional direct outreach resource-intensive and inefficient. A strategic, scalable approach is required.
+            </p>
+        </div>
+        <div class="highlight-box">
+            <h3>Key Risks</h3>
+            <ul>
+                <li>Missing high-value commercial projects</li>
+                <li>Limited brand prestige in premium market</li>
+                <li>Competitors gaining specifier loyalty</li>
+                <li>Market share growth ceiling</li>
+                <li>Reduced pricing power</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- Strategy Overview -->
+<section class="slide" id="strategy">
+    <h2>The Strategic Approach</h2>
+    <p style="text-align: center; max-width: 700px; margin: 0 auto 60px; color: #666;">
+        A 12-month program structured in three phases: Foundation, Growth, and Scale. Focus on relationship building, not selling.
+    </p>
+    <div class="content-grid">
+        <div class="card">
+            <div class="card-number">01</div>
+            <h3>Foundation</h3>
+            <p>Months 1-4: Build digital infrastructure, create specifier resources, establish CPD program, and identify target firms.</p>
+        </div>
+        <div class="card">
+            <div class="card-number">02</div>
+            <h3>Growth</h3>
+            <p>Months 5-8: Launch relationship programs, attend key trade shows, deliver CPD sessions, build firm library presence.</p>
+        </div>
+        <div class="card">
+            <div class="card-number">03</div>
+            <h3>Scale</h3>
+            <p>Months 9-12: Expand successful channels, leverage case studies, pursue industry awards, optimize based on data.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Why 12 Months -->
+<section class="slide" style="background: var(--light-gray);">
+    <h2>Why 12 Months?</h2>
+    <div class="stat-grid">
+        <div class="stat-card">
+            <div class="stat-number">91%</div>
+            <p class="stat-label">of architects specify based on seeing successful applications</p>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">60+</div>
+            <p class="stat-label">minutes spent researching before specification</p>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">6-18</div>
+            <p class="stat-label">month project cycles for commercial work</p>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">70%</div>
+            <p class="stat-label">influenced by peer recommendations</p>
+        </div>
+    </div>
+    <p style="text-align: center; max-width: 800px; margin: 48px auto 0; color: #666;">
+        Architect relationships take time to build. A 12-month strategy allows for proper foundation building, demonstrated project success, and organic relationship development. Shorter timeframes risk appearing transactional rather than consultative.
+    </p>
+</section>
+
+<!-- Timeline -->
+<section class="slide" id="timeline">
+    <h2 style="text-align: center;">12-Month Roadmap</h2>
+    <div class="timeline">
+        <div class="timeline-item">
+            <div class="timeline-content">
+                <span class="phase-tag foundation">Foundation</span>
+                <h3>Months 1-2</h3>
+                <ul class="checklist">
+                    <li>Build specifier-focused website section with BIM/CAD downloads</li>
+                    <li>Create comprehensive technical specification sheets</li>
+                    <li>Develop architect sample box program</li>
+                    <li>Identify top 100 target architecture firms</li>
+                </ul>
+            </div>
+            <div class="timeline-marker"></div>
+        </div>
+        <div class="timeline-item">
+            <div class="timeline-content">
+                <span class="phase-tag foundation">Foundation</span>
+                <h3>Months 3-4</h3>
+                <ul class="checklist">
+                    <li>Launch AIA-accredited CPD program (2 modules)</li>
+                    <li>Register for Design Show Australia 2026</li>
+                    <li>Establish partnerships with 3 architecture publications</li>
+                    <li>Create project gallery showcasing installed products</li>
+                </ul>
+            </div>
+            <div class="timeline-marker"></div>
+        </div>
+        <div class="timeline-item">
+            <div class="timeline-content">
+                <span class="phase-tag growth">Growth</span>
+                <h3>Months 5-6</h3>
+                <ul class="checklist">
+                    <li>Execute Design Show Australia presence</li>
+                    <li>Begin lunch & learn program (target: 15 firms)</li>
+                    <li>Launch digital advertising to specifier audience</li>
+                    <li>Place products in 20 firm sample libraries</li>
+                </ul>
+            </div>
+            <div class="timeline-marker"></div>
+        </div>
+        <div class="timeline-item">
+            <div class="timeline-content">
+                <span class="phase-tag growth">Growth</span>
+                <h3>Months 7-8</h3>
+                <ul class="checklist">
+                    <li>Host architect showroom event (target: 50 attendees)</li>
+                    <li>Expand CPD to 4 accredited modules</li>
+                    <li>Achieve 30 lunch & learn presentations</li>
+                    <li>Document 5 specification case studies</li>
+                </ul>
+            </div>
+            <div class="timeline-marker"></div>
+        </div>
+        <div class="timeline-item">
+            <div class="timeline-content">
+                <span class="phase-tag scale">Scale</span>
+                <h3>Months 9-10</h3>
+                <ul class="checklist">
+                    <li>Submit projects for Australian Interior Design Awards</li>
+                    <li>Expand to Kitchen + Bath Show presence</li>
+                    <li>Launch specifier newsletter (monthly)</li>
+                    <li>Achieve 50 firm library placements</li>
+                </ul>
+            </div>
+            <div class="timeline-marker"></div>
+        </div>
+        <div class="timeline-item">
+            <div class="timeline-content">
+                <span class="phase-tag scale">Scale</span>
+                <h3>Months 11-12</h3>
+                <ul class="checklist">
+                    <li>Host end-of-year architect appreciation event</li>
+                    <li>Analyze program performance and ROI</li>
+                    <li>Plan Year 2 expansion strategy</li>
+                    <li>Target: 25 new specification projects in pipeline</li>
+                </ul>
+            </div>
+            <div class="timeline-marker"></div>
+        </div>
+    </div>
+</section>
+
+<!-- Key Tactics -->
+<section class="slide" id="tactics">
+    <h2>Key Tactical Pillars</h2>
+    <div class="content-grid">
+        <div class="card">
+            <h3>CPD Education Program</h3>
+            <p>Architects require continuing education credits. Develop AIA-accredited modules on bathroom design trends, material innovation, and sustainability. Position as thought leader, not salesperson.</p>
+            <div class="kpi-grid" style="grid-template-columns: 1fr 1fr;">
+                <div class="kpi-item">
+                    <div class="kpi-value">4</div>
+                    <div class="kpi-label">Accredited Modules</div>
+                </div>
+                <div class="kpi-item">
+                    <div class="kpi-value">50+</div>
+                    <div class="kpi-label">Sessions Year 1</div>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <h3>Firm Library Program</h3>
+            <p>Most firms maintain product libraries. Provide premium sample kits with full technical documentation. Make it effortless to specify with BIM files and formatted specs.</p>
+            <div class="kpi-grid" style="grid-template-columns: 1fr 1fr;">
+                <div class="kpi-item">
+                    <div class="kpi-value">50</div>
+                    <div class="kpi-label">Library Placements</div>
+                </div>
+                <div class="kpi-item">
+                    <div class="kpi-value">100%</div>
+                    <div class="kpi-label">BIM Coverage</div>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <h3>Trade Show Presence</h3>
+            <p>Design Show Australia is vital for networking with top designers and architects. Create immersive booth experience showcasing product range and customization capabilities.</p>
+            <div class="kpi-grid" style="grid-template-columns: 1fr 1fr;">
+                <div class="kpi-item">
+                    <div class="kpi-value">2</div>
+                    <div class="kpi-label">Major Shows</div>
+                </div>
+                <div class="kpi-item">
+                    <div class="kpi-value">500+</div>
+                    <div class="kpi-label">Lead Contacts</div>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <h3>Case Study Marketing</h3>
+            <p>91% of architects specify based on seeing successful applications. Document completed projects with professional photography, architect testimonials, and specification details.</p>
+            <div class="kpi-grid" style="grid-template-columns: 1fr 1fr;">
+                <div class="kpi-item">
+                    <div class="kpi-value">10</div>
+                    <div class="kpi-label">Case Studies</div>
+                </div>
+                <div class="kpi-item">
+                    <div class="kpi-value">3</div>
+                    <div class="kpi-label">Award Submissions</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Digital Infrastructure -->
+<section class="slide" id="digital" style="background: var(--light-gray);">
+    <h2>Digital Infrastructure</h2>
+    <p style="text-align: center; max-width: 700px; margin: 0 auto 48px; color: #666;">
+        59% of architects use search engines and 54% check manufacturer websites when researching products. Your digital presence must serve their needs.
+    </p>
+    <div class="two-column">
+        <div>
+            <h3>Website Requirements</h3>
+            <ul class="checklist">
+                <li>Dedicated specifier/trade portal</li>
+                <li>Downloadable BIM & CAD files for every product</li>
+                <li>CSI-formatted specifications</li>
+                <li>High-resolution product photography</li>
+                <li>Technical documentation library</li>
+                <li>Project gallery with filter by type</li>
+                <li>CPD registration and tracking</li>
+                <li>Sample request system</li>
+            </ul>
+        </div>
+        <div>
+            <h3>Content Strategy</h3>
+            <ul class="checklist">
+                <li>Monthly specifier newsletter</li>
+                <li>Trend reports and design insights</li>
+                <li>Video installation guides</li>
+                <li>Architect interview series</li>
+                <li>Sustainability certifications display</li>
+                <li>Local sourcing and manufacturing story</li>
+                <li>Lead time and availability transparency</li>
+                <li>SEO optimization for specification terms</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- Budget -->
+<section class="slide" id="budget">
+    <h2>Investment Framework</h2>
+    <table class="budget-table">
+        <thead>
+            <tr>
+                <th>Initiative</th>
+                <th>Annual Investment</th>
+                <th>Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Trade Shows (2 events)</td>
+                <td>$45,000 - $65,000</td>
+                <td>Booth, materials, travel, hospitality</td>
+            </tr>
+            <tr>
+                <td>CPD Program Development</td>
+                <td>$15,000 - $25,000</td>
+                <td>Content creation, AIA accreditation</td>
+            </tr>
+            <tr>
+                <td>Sample Library Program</td>
+                <td>$20,000 - $30,000</td>
+                <td>Premium sample kits for 50 firms</td>
+            </tr>
+            <tr>
+                <td>Digital Infrastructure</td>
+                <td>$25,000 - $40,000</td>
+                <td>Website portal, BIM files, content</td>
+            </tr>
+            <tr>
+                <td>Events & Hospitality</td>
+                <td>$20,000 - $30,000</td>
+                <td>Showroom events, lunch & learns</td>
+            </tr>
+            <tr>
+                <td>Marketing & Advertising</td>
+                <td>$15,000 - $25,000</td>
+                <td>Trade publications, digital ads</td>
+            </tr>
+            <tr>
+                <td>Photography & Case Studies</td>
+                <td>$10,000 - $15,000</td>
+                <td>Professional project documentation</td>
+            </tr>
+            <tr class="total-row">
+                <td><strong>Total Year 1</strong></td>
+                <td><strong>$150,000 - $230,000</strong></td>
+                <td>Scalable based on market response</td>
+            </tr>
+        </tbody>
+    </table>
+    <p style="text-align: center; margin-top: 32px; color: #666; font-size: 0.9rem;">
+        ROI Target: 5-10 specification projects in Year 1 with average project value of $50,000+ in product sales
+    </p>
+</section>
+
+<!-- KPIs -->
+<section class="slide" id="kpis">
+    <h2>Success Metrics</h2>
+    <div class="content-grid">
+        <div class="card">
+            <h3>Relationship KPIs</h3>
+            <ul class="checklist">
+                <li>100 architect contacts in CRM</li>
+                <li>50 firm library placements</li>
+                <li>50+ CPD sessions delivered</li>
+                <li>30 lunch & learn presentations</li>
+                <li>25 specifier newsletter subscribers per month</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h3>Business KPIs</h3>
+            <ul class="checklist">
+                <li>25 specification projects in pipeline</li>
+                <li>5-10 converted specification sales</li>
+                <li>$250K+ specification revenue Year 1</li>
+                <li>3 award submissions</li>
+                <li>15% of revenue from specifier channel by Year 2</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h3>Digital KPIs</h3>
+            <ul class="checklist">
+                <li>500+ BIM/CAD downloads</li>
+                <li>1,000+ trade portal registrations</li>
+                <li>50% increase in specification page traffic</li>
+                <li>200+ sample requests via website</li>
+                <li>Top 3 ranking for key specification terms</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="slide cta-section" id="action">
+    <h2>Ready to Begin</h2>
+    <p style="max-width: 600px; margin: 0 auto; opacity: 0.9; font-size: 1.1rem;">
+        The specifier market represents untapped potential for premium project acquisition. This 12-month strategy provides a structured, relationship-focused approach to becoming the preferred bathware specification for Australia's leading architects and designers.
+    </p>
+    <div style="margin-top: 48px;">
+        <p style="font-size: 1.4rem; font-weight: 500; margin-bottom: 8px;">Next Steps</p>
+        <p style="opacity: 0.8;">1. Approve strategy framework  →  2. Finalize budget allocation  →  3. Assign program lead  →  4. Begin Month 1 execution</p>
+    </div>
+</section>
+
+<script>
+    // Navigation highlighting
+    const sections = document.querySelectorAll('.slide[id]');
+    const navLinks = document.querySelectorAll('nav a');
+
+    window.addEventListener('scroll', () => {
+        let current = '';
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            if (scrollY >= sectionTop - 200) {
+                current = section.getAttribute('id');
+            }
+        });
+
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === '#' + current) {
+                link.classList.add('active');
+            }
+        });
+    });
+</script>
+
+</body>
+</html>
