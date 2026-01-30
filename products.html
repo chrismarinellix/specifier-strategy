@@ -2368,6 +2368,23 @@ function init3DBasinViewer() {
 
 let currentProductType = 'tondo';
 
+// Optimal camera settings for each product type
+const cameraSettings = {
+    tondo:   { y: 0.7, z: 5.2, lookY: 0.5 },
+    ovale:   { y: 0.7, z: 5.8, lookY: 0.5 },
+    fuse:    { y: 0.8, z: 5.0, lookY: 0.6 },
+    capsule: { y: 0.3, z: 3.0, lookY: 0.1 },
+    bowl:    { y: 0.25, z: 2.8, lookY: 0.05 },
+    noah:    { y: 0.3, z: 3.2, lookY: 0.15 }
+};
+
+function updateCameraForProduct(productType) {
+    if (!basinCamera) return;
+    const settings = cameraSettings[productType] || cameraSettings.tondo;
+    basinCamera.position.set(0, settings.y, settings.z);
+    basinCamera.lookAt(0, settings.lookY, 0);
+}
+
 function createBasinMesh(color = '#FFFFFF', productType = 'tondo') {
     // Remove existing mesh
     if (basinMesh) {
@@ -2648,6 +2665,9 @@ function createBasinMesh(color = '#FFFFFF', productType = 'tondo') {
     group.position.y = groupY;
     basinMesh = group;
     basinScene.add(basinMesh);
+
+    // Update camera for this product type
+    updateCameraForProduct(productType);
 }
 
 function onMouseDown(e) {
@@ -2808,9 +2828,7 @@ document.querySelectorAll('.viewer-btn').forEach(btn => {
             basinAutoRotate = true;
             wireframe = false;
             basinRotation = { x: 0, y: 0 };
-            if (basinCamera) {
-                basinCamera.position.set(0, 0.8, 5.5);
-            }
+            updateCameraForProduct(currentProductType);
             if (basinMesh) {
                 basinMesh.traverse((child) => {
                     if (child.isMesh && child.material) {
