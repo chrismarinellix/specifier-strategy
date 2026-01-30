@@ -1,0 +1,2932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Showcase | Specifier Strategy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Archivo:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --stone: #E8E4DF;
+            --warm-white: #FDFBF7;
+            --charcoal: #2D2D2D;
+            --terracotta: #C4A484;
+            --sage: #A8B5A0;
+            --slate: #4A5568;
+            --cream: #F5F2ED;
+            --oak: #B8976C;
+            --concrete: #9CA3AF;
+            --dusty-pink: #D4A5A5;
+            --desert-red: #C17A6B;
+            --light-grey: #D1D5DB;
+            --mid-grey: #9CA3AF;
+            --dark-grey: #4B5563;
+            --basalt: #374151;
+            --sandstone: #D4B896;
+            --mint: #A7C4B5;
+            --aegean: #6B8E9F;
+            --coral: #E8A091;
+            --sky-blue: #89B4C8;
+            --lichen: #8B9F7B;
+            --deep-blue: #3D5A6C;
+            --ocean-mist: #B8C9CE;
+            --mustard: #D4A84B;
+            --lemon: #E8D56B;
+            --cherry-red: #C45C5C;
+            --umber: #6B5344;
+            --oyster: #D8CFC4;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Archivo', sans-serif;
+            font-weight: 300;
+            background: var(--warm-white);
+            color: var(--charcoal);
+            line-height: 1.8;
+            letter-spacing: 0.01em;
+            overflow-x: hidden;
+        }
+
+        /* WebGPU Canvas */
+        #webgpu-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        /* Loading Screen */
+        .loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--charcoal);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .loader-text {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.2rem;
+            color: var(--stone);
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            opacity: 0;
+            animation: fadeIn 0.8s ease forwards;
+        }
+
+        .loader-line {
+            width: 120px;
+            height: 1px;
+            background: var(--slate);
+            margin-top: 40px;
+            overflow: hidden;
+        }
+
+        .loader-progress {
+            height: 100%;
+            background: var(--terracotta);
+            width: 0%;
+            animation: loadProgress 1.5s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        @keyframes loadProgress {
+            to { width: 100%; }
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 40px 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            background: linear-gradient(to bottom, rgba(253,251,247,0.98), rgba(253,251,247,0.8), transparent);
+        }
+
+        .logo {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+            color: var(--charcoal);
+            text-decoration: none;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 50px;
+        }
+
+        .nav-links a {
+            color: var(--slate);
+            text-decoration: none;
+            font-size: 0.75rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            position: relative;
+            padding: 5px 0;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--charcoal);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: var(--terracotta);
+            transition: width 0.4s ease;
+        }
+
+        .nav-links a:hover::after, .nav-links a.active::after {
+            width: 100%;
+        }
+
+        /* Hero Section */
+        .products-hero {
+            min-height: 60vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 160px 80px 80px;
+        }
+
+        .hero-content {
+            text-align: center;
+            max-width: 900px;
+        }
+
+        .hero-eyebrow {
+            font-size: 0.7rem;
+            letter-spacing: 0.5em;
+            text-transform: uppercase;
+            color: var(--terracotta);
+            margin-bottom: 30px;
+        }
+
+        .products-hero h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 300;
+            line-height: 1.1;
+            margin-bottom: 30px;
+        }
+
+        .hero-description {
+            font-size: 1.1rem;
+            color: var(--slate);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.9;
+        }
+
+        /* Material Badge */
+        .material-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--charcoal);
+            color: var(--stone);
+            padding: 15px 30px;
+            margin-top: 40px;
+            font-size: 0.75rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+        }
+
+        .material-badge svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* 3D Viewer Section */
+        .viewer-section {
+            padding: 80px;
+            background: var(--cream);
+            position: relative;
+        }
+
+        .viewer-container {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 60px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .webgpu-viewer {
+            background: linear-gradient(135deg, var(--warm-white) 0%, var(--stone) 100%);
+            border-radius: 4px;
+            height: 600px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+        }
+
+        #basin-3d-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .viewer-label {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .product-name-label {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.8rem;
+            color: var(--charcoal);
+        }
+
+        .interaction-hint {
+            font-size: 0.7rem;
+            color: var(--slate);
+            letter-spacing: 0.1em;
+        }
+
+        .viewer-controls {
+            position: absolute;
+            bottom: 85px;
+            left: 30px;
+            display: flex;
+            gap: 15px;
+        }
+
+        /* Product Selector Bar */
+        .product-selector {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(45, 45, 45, 0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: center;
+            gap: 0;
+            border-radius: 0 0 4px 4px;
+        }
+
+        .product-tab {
+            padding: 16px 24px;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+            color: var(--concrete);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            letter-spacing: 0.05em;
+        }
+
+        .product-tab:hover {
+            color: var(--stone);
+            background: rgba(255,255,255,0.05);
+        }
+
+        .product-tab.active {
+            color: var(--warm-white);
+            background: rgba(196, 164, 132, 0.15);
+        }
+
+        .product-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 2px;
+            background: var(--terracotta);
+        }
+
+        .product-tab-type {
+            display: block;
+            font-family: 'Archivo', sans-serif;
+            font-size: 0.55rem;
+            color: var(--slate);
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            margin-top: 3px;
+        }
+
+        .product-tab.active .product-tab-type {
+            color: var(--terracotta);
+        }
+
+        .viewer-btn {
+            width: 50px;
+            height: 50px;
+            background: var(--warm-white);
+            border: 1px solid var(--stone);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .viewer-btn:hover {
+            background: var(--charcoal);
+            color: var(--warm-white);
+            border-color: var(--charcoal);
+        }
+
+        .viewer-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Color Selector */
+        .color-selector {
+            background: var(--warm-white);
+            padding: 40px;
+            border-radius: 4px;
+        }
+
+        .color-selector h3 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.3rem;
+            font-weight: 400;
+            margin-bottom: 25px;
+        }
+
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .color-swatch {
+            aspect-ratio: 1;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .color-swatch:hover {
+            transform: scale(1.15);
+        }
+
+        .color-swatch.active {
+            border-color: var(--charcoal);
+        }
+
+        .color-swatch::after {
+            content: attr(data-name);
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.6rem;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            color: var(--slate);
+        }
+
+        .color-swatch:hover::after {
+            opacity: 1;
+        }
+
+        .selected-color {
+            padding: 20px;
+            background: var(--cream);
+            text-align: center;
+        }
+
+        .selected-color-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .selected-color-code {
+            font-size: 0.75rem;
+            color: var(--slate);
+            letter-spacing: 0.1em;
+        }
+
+        /* Products Grid */
+        .products-section {
+            padding: 120px 80px;
+        }
+
+        .section-header {
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto 80px;
+        }
+
+        .section-number {
+            font-size: 0.7rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--terracotta);
+            display: block;
+            margin-bottom: 20px;
+        }
+
+        .section-header h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 300;
+            margin-bottom: 20px;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Product Card */
+        .product-card {
+            background: var(--warm-white);
+            border: 1px solid var(--stone);
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.1);
+        }
+
+        .product-image {
+            height: 320px;
+            background: linear-gradient(135deg, var(--cream) 0%, var(--stone) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-image svg {
+            width: 60%;
+            height: 60%;
+            opacity: 0.9;
+        }
+
+        .product-badge {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: var(--charcoal);
+            color: var(--stone);
+            padding: 8px 16px;
+            font-size: 0.65rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+        }
+
+        .product-content {
+            padding: 35px;
+        }
+
+        .product-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.8rem;
+            font-weight: 400;
+            margin-bottom: 10px;
+        }
+
+        .product-tagline {
+            font-size: 0.85rem;
+            color: var(--slate);
+            margin-bottom: 25px;
+            font-style: italic;
+        }
+
+        .product-specs-mini {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            padding-top: 25px;
+            border-top: 1px solid var(--stone);
+        }
+
+        .spec-mini {
+            text-align: center;
+        }
+
+        .spec-mini-value {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.3rem;
+            color: var(--terracotta);
+        }
+
+        .spec-mini-label {
+            font-size: 0.65rem;
+            color: var(--slate);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .product-cta {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .btn-primary, .btn-secondary {
+            flex: 1;
+            padding: 15px;
+            font-size: 0.7rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--charcoal);
+            color: var(--warm-white);
+            border: 1px solid var(--charcoal);
+        }
+
+        .btn-primary:hover {
+            background: var(--terracotta);
+            border-color: var(--terracotta);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--charcoal);
+            border: 1px solid var(--stone);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--charcoal);
+        }
+
+        /* Specifications Section */
+        .specs-section {
+            padding: 120px 80px;
+            background: var(--charcoal);
+            color: var(--stone);
+        }
+
+        .specs-section h2 {
+            color: var(--stone);
+        }
+
+        .specs-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .spec-product {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            padding: 80px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .spec-product:last-child {
+            border-bottom: none;
+        }
+
+        /* Technical Drawing (SVG Schematic) */
+        .technical-drawing {
+            background: rgba(255,255,255,0.03);
+            padding: 40px;
+            border-radius: 4px;
+            position: relative;
+        }
+
+        .drawing-label {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 0.65rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--terracotta);
+        }
+
+        .schematic {
+            width: 100%;
+            height: 400px;
+        }
+
+        .schematic line, .schematic path {
+            stroke: var(--stone);
+            stroke-width: 1;
+            fill: none;
+        }
+
+        .schematic .dimension-line {
+            stroke: var(--terracotta);
+            stroke-width: 0.5;
+            stroke-dasharray: 4,2;
+        }
+
+        .schematic text {
+            fill: var(--stone);
+            font-family: 'Archivo', sans-serif;
+            font-size: 10px;
+        }
+
+        .schematic .dimension-text {
+            fill: var(--terracotta);
+            font-size: 11px;
+        }
+
+        /* Spec Details */
+        .spec-details {
+            padding: 20px 0;
+        }
+
+        .spec-details h3 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2rem;
+            font-weight: 300;
+            margin-bottom: 15px;
+            color: var(--warm-white);
+        }
+
+        .spec-details .tagline {
+            font-style: italic;
+            color: var(--terracotta);
+            margin-bottom: 30px;
+        }
+
+        .spec-table {
+            width: 100%;
+            margin-top: 30px;
+        }
+
+        .spec-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .spec-row:last-child {
+            border-bottom: none;
+        }
+
+        .spec-label {
+            font-size: 0.8rem;
+            color: var(--concrete);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .spec-value {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+            color: var(--warm-white);
+            text-align: right;
+        }
+
+        .spec-category {
+            font-size: 0.7rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--terracotta);
+            margin-top: 40px;
+            margin-bottom: 15px;
+        }
+
+        .download-specs {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 40px;
+            padding: 18px 30px;
+            background: transparent;
+            border: 1px solid var(--terracotta);
+            color: var(--terracotta);
+            font-size: 0.7rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .download-specs:hover {
+            background: var(--terracotta);
+            color: var(--charcoal);
+        }
+
+        .download-specs svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Warranty Section */
+        .warranty-section {
+            padding: 120px 80px;
+            background: var(--cream);
+        }
+
+        .warranty-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+            max-width: 1200px;
+            margin: 60px auto 0;
+        }
+
+        .warranty-card {
+            text-align: center;
+            padding: 50px 40px;
+            background: var(--warm-white);
+            border: 1px solid var(--stone);
+        }
+
+        .warranty-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 25px;
+            border: 1px solid var(--terracotta);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .warranty-icon svg {
+            width: 32px;
+            height: 32px;
+            stroke: var(--terracotta);
+        }
+
+        .warranty-card h3 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.4rem;
+            font-weight: 400;
+            margin-bottom: 15px;
+        }
+
+        .warranty-card p {
+            font-size: 0.85rem;
+            color: var(--slate);
+            line-height: 1.8;
+        }
+
+        .warranty-value {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 3rem;
+            color: var(--terracotta);
+            margin-top: 20px;
+        }
+
+        /* Footer */
+        footer {
+            padding: 80px;
+            background: var(--charcoal);
+            color: var(--stone);
+            text-align: center;
+        }
+
+        footer .logo {
+            color: var(--stone);
+            margin-bottom: 30px;
+            display: inline-block;
+        }
+
+        footer p {
+            font-size: 0.8rem;
+            color: var(--concrete);
+        }
+
+        /* Custom Cursor */
+        .cursor {
+            width: 12px;
+            height: 12px;
+            border: 1px solid var(--terracotta);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            mix-blend-mode: difference;
+            transition: transform 0.15s ease;
+        }
+
+        .cursor.hover {
+            transform: scale(2);
+        }
+
+        /* GPU Info Badge */
+        .gpu-badge {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(45,45,45,0.9);
+            color: var(--stone);
+            padding: 12px 20px;
+            font-size: 0.65rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .gpu-badge .dot {
+            width: 8px;
+            height: 8px;
+            background: #4ADE80;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .gpu-badge.fallback .dot {
+            background: var(--terracotta);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .viewer-container { grid-template-columns: 1fr; }
+            .spec-product { grid-template-columns: 1fr; gap: 40px; }
+            .warranty-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            .products-hero, .products-section, .specs-section, .warranty-section { padding: 80px 30px; }
+            nav { padding: 25px 30px; }
+            .nav-links { display: none; }
+            .products-grid { grid-template-columns: 1fr; }
+            .color-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Custom Cursor -->
+<div class="cursor"></div>
+
+<!-- Loading Screen -->
+<div class="loader">
+    <div class="loader-text">Loading Product Showcase</div>
+    <div class="loader-line">
+        <div class="loader-progress"></div>
+    </div>
+</div>
+
+<!-- WebGPU Canvas -->
+<canvas id="webgpu-canvas"></canvas>
+
+<!-- GPU Info Badge -->
+<div class="gpu-badge">
+    <span class="dot"></span>
+    <span class="gpu-status">WebGPU Active</span>
+</div>
+
+<!-- Navigation -->
+<nav>
+    <a href="index.html" class="logo">Specifier Strategy</a>
+    <div class="nav-links">
+        <a href="index.html">Strategy</a>
+        <a href="products.html" class="active">Products</a>
+        <a href="#specs">Specifications</a>
+        <a href="#warranty">Warranty</a>
+    </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="products-hero">
+    <div class="hero-content">
+        <p class="hero-eyebrow">Architect Collection</p>
+        <h1>Precision-Crafted<br>Concrete Bathware</h1>
+        <p class="hero-description">Handcrafted in Melbourne using our proprietary Duronite 423™ commercial-grade composite. Each piece delivers decades of maintenance-free luxury for residential and commercial applications.</p>
+        <div class="material-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+            </svg>
+            <span>Duronite 423™ — 10 Year Warranty</span>
+        </div>
+    </div>
+</section>
+
+<!-- 3D Viewer Section -->
+<section class="viewer-section">
+    <div class="viewer-container">
+        <div class="webgpu-viewer" id="product-viewer">
+            <canvas id="basin-3d-canvas"></canvas>
+            <div class="viewer-label">
+                <span class="product-name-label">Tondo</span>
+                <span class="interaction-hint">Drag to rotate • Scroll to zoom</span>
+            </div>
+            <div class="viewer-controls">
+                <button class="viewer-btn" data-action="rotate" title="Auto Rotate">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                </button>
+                <button class="viewer-btn" data-action="reset" title="Reset View">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                </button>
+                <button class="viewer-btn" data-action="wireframe" title="Toggle Wireframe">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/>
+                    </svg>
+                </button>
+            </div>
+            <!-- Product Selector Bar -->
+            <div class="product-selector">
+                <button class="product-tab active" data-product="tondo">
+                    Tondo
+                    <span class="product-tab-type">Pedestal</span>
+                </button>
+                <button class="product-tab" data-product="ovale">
+                    Ovale
+                    <span class="product-tab-type">Pedestal</span>
+                </button>
+                <button class="product-tab" data-product="fuse">
+                    Fuse
+                    <span class="product-tab-type">Pedestal</span>
+                </button>
+                <button class="product-tab" data-product="capsule">
+                    Capsule
+                    <span class="product-tab-type">Countertop</span>
+                </button>
+                <button class="product-tab" data-product="bowl">
+                    Bowl
+                    <span class="product-tab-type">Countertop</span>
+                </button>
+                <button class="product-tab" data-product="noah">
+                    Noah
+                    <span class="product-tab-type">Wall-Hung</span>
+                </button>
+            </div>
+        </div>
+        <div class="color-selector">
+            <h3>24 Colour Options</h3>
+            <div class="color-grid">
+                <div class="color-swatch active" style="background: #FFFFFF" data-name="White" data-color="#FFFFFF"></div>
+                <div class="color-swatch" style="background: #D4A5A5" data-name="Dusty Pink" data-color="#D4A5A5"></div>
+                <div class="color-swatch" style="background: #C17A6B" data-name="Desert Red" data-color="#C17A6B"></div>
+                <div class="color-swatch" style="background: #D1D5DB" data-name="Light Grey" data-color="#D1D5DB"></div>
+                <div class="color-swatch" style="background: #A8B5A0" data-name="Sage" data-color="#A8B5A0"></div>
+                <div class="color-swatch" style="background: #C45C5C" data-name="Cherry Red" data-color="#C45C5C"></div>
+                <div class="color-swatch" style="background: #9CA3AF" data-name="Mid Grey" data-color="#9CA3AF"></div>
+                <div class="color-swatch" style="background: #D8CFC4" data-name="Oyster" data-color="#D8CFC4"></div>
+                <div class="color-swatch" style="background: #E8D56B" data-name="Lemon" data-color="#E8D56B"></div>
+                <div class="color-swatch" style="background: #4B5563" data-name="Dark Grey" data-color="#4B5563"></div>
+                <div class="color-swatch" style="background: #6B5344" data-name="Umber" data-color="#6B5344"></div>
+                <div class="color-swatch" style="background: #D4A84B" data-name="Mustard" data-color="#D4A84B"></div>
+                <div class="color-swatch" style="background: #374151" data-name="Basalt" data-color="#374151"></div>
+                <div class="color-swatch" style="background: #D4B896" data-name="Sandstone" data-color="#D4B896"></div>
+                <div class="color-swatch" style="background: #A7C4B5" data-name="Mint" data-color="#A7C4B5"></div>
+                <div class="color-swatch" style="background: #6B8E9F" data-name="Aegean" data-color="#6B8E9F"></div>
+                <div class="color-swatch" style="background: #E8A091" data-name="Coral" data-color="#E8A091"></div>
+                <div class="color-swatch" style="background: #4A7C59" data-name="Green" data-color="#4A7C59"></div>
+                <div class="color-swatch" style="background: #89B4C8" data-name="Sky Blue" data-color="#89B4C8"></div>
+                <div class="color-swatch" style="background: #C4A484" data-name="Terracotta" data-color="#C4A484"></div>
+                <div class="color-swatch" style="background: #8B9F7B" data-name="Lichen" data-color="#8B9F7B"></div>
+                <div class="color-swatch" style="background: #3D5A6C" data-name="Deep Blue" data-color="#3D5A6C"></div>
+                <div class="color-swatch" style="background: #B8C9CE" data-name="Ocean Mist" data-color="#B8C9CE"></div>
+                <div class="color-swatch" style="background: #2D2D2D" data-name="Charcoal" data-color="#2D2D2D"></div>
+            </div>
+            <div class="selected-color">
+                <div class="selected-color-name">White</div>
+                <div class="selected-color-code">#FFFFFF</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Products Grid -->
+<section class="products-section" id="products">
+    <div class="section-header">
+        <span class="section-number">01 — Basin Collection</span>
+        <h2>Sculptural Forms for Considered Spaces</h2>
+    </div>
+    <div class="products-grid">
+        <!-- Tondo -->
+        <div class="product-card" data-product="tondo">
+            <div class="product-image">
+                <div class="product-badge">Pedestal</div>
+                <svg viewBox="0 0 200 200">
+                    <!-- Stylized basin SVG -->
+                    <ellipse cx="100" cy="60" rx="70" ry="25" fill="none" stroke="currentColor" stroke-width="1"/>
+                    <path d="M30 60 Q30 90 50 120 L50 180 Q50 190 60 190 L140 190 Q150 190 150 180 L150 120 Q170 90 170 60" fill="none" stroke="currentColor" stroke-width="1"/>
+                    <ellipse cx="100" cy="60" rx="55" ry="18" fill="none" stroke="currentColor" stroke-width="0.5" stroke-dasharray="2,2"/>
+                </svg>
+            </div>
+            <div class="product-content">
+                <h3 class="product-name">Tondo</h3>
+                <p class="product-tagline">"Beyond ordinary" — A classic freestanding design</p>
+                <div class="product-specs-mini">
+                    <div class="spec-mini">
+                        <div class="spec-mini-value">Ø450</div>
+                        <div class="spec-mini-label">Diameter</div>
+                    </div>
+                    <div class="spec-mini">
+                        <div class="spec-mini-value">850</div>
+                        <div class="spec-mini-label">Height mm</div>
+                    </div>
+                    <div class="spec-mini">
+                        <div class="spec-mini-value">62</div>
+                        <div class="spec-mini-label">Weight kg</div>
+                    </div>
+                </div>
+                <div class="product-cta">
+                    <a href="#specs" class="btn-primary">Full Specs</a>
+                    <a href="#" class="btn-secondary">CAD Files</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ovale -->
+        <div class="product-card" data-product="ovale">
+            <div class="product-image">
+                <div class="product-badge">Pedestal</div>
+                <svg viewBox="0 0 200 200">
+                    <ellipse cx="100" cy="55" rx="80" ry="30" fill="none" stroke="currentColor" stroke-width="1"/>
+                    <path d="M20 55 Q20 100 45 130 L45 175 Q45 185 55 185 L145 185 Q155 185 155 175 L155 130 Q180 100 180 55" fill="none" stroke="currentColor" stroke-width="1"/>
+                    <ellipse cx="100" cy="55" rx="65" ry="22" fill="none" stroke="currentColor" stroke-width="0.5" stroke-dasharray="2,2"/>
+                </svg>
+            </div>
+            <div class="product-content">
+                <h3 class="product-name">Ovale</h3>
+                <p class="product-tagline">"Soft yet strong volume" — Commanding presence</p>
+                <div class="product-specs-mini">
+                    <div class="spec-mini">
+                        <div class="spec-mini-value">600×420</div>
+                        <div class="spec-mini-label">L × W mm</div>
+                    </div>
+                    <div class="spec-mini">
+                        <div class="spec-mini-value">860</div>
+                        <div class="spec-mini-label">Height mm</div>
+                    </div>
+                    <div class="spec-mini">
+                        <div class="spec-mini-value">78</div>
+                        <div class="spec-mini-label">Weight kg</div>
+                    </div>
+                </div>
+                <div class="product-cta">
+                    <a href="#specs" class="btn-primary">Full Specs</a>
+                    <a href="#" class="btn-secondary">CAD Files</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fuse -->
+        <div class="product-card" data-product="fuse">
+            <div class="product-image">
+                <div class="product-badge">Pedestal</div>
+                <svg viewBox="0 0 200 200">
+                    <!-- Angular/cubist design -->
+                    <polygon points="40,50 160,50 155,55 45,55" fill="none" stroke="currentColor" stroke-width="1"/>
+                    <path d="M45 55 L50 120 L50 180 L150 180 L150 120 L155 55" fill="none" stroke="currentColor" stroke-width="1"/>
+                    <rect x="55" y="60" width="90" height="15" fill="none" stroke="currentColor" stroke-width="0.5" stroke-dasharray="2,2"/>
+                </svg>
+            </div>
+            <div class="product-content">
+                <h3 class="product-name">Fuse</h3>
+                <p class="product-tagline">"Cubism design philosophy" — Functional artistry</p>
+                <div class="product-specs-mini">
+                    <div class="spec-mini">
+                        <div class="spec-mini-value">500×400</div>
+                        <div class="spec-mini-label">L × W mm</div>
+                    </div>
+                    <div class="spec-mini">
+                        <div class="spec-mini-value">855</div>
+                        <div class="spec-mini-label">Height mm</div>
+                    </div>
+                    <div class="spec-mini">
+                        <div class="spec-mini-value">58</div>
+                        <div class="spec-mini-label">Weight kg</div>
+                    </div>
+                </div>
+                <div class="product-cta">
+                    <a href="#specs" class="btn-primary">Full Specs</a>
+                    <a href="#" class="btn-secondary">CAD Files</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Capsule (Countertop) -->
+        <div class="product-card" data-product="capsule">
+            <div class="product-image">
+                <div class="product-badge">Countertop</div>
+                <svg viewBox="0 0 200 200">
+                    <!-- Countertop basin -->
+                    <ellipse cx="100" cy="100" rx="75" ry="35" fill="none" stroke="currentColor" stroke-width="1"/>
+                    <ellipse cx="100" cy="105" rx="75" ry="35" fill="none" stroke="currentColor" stroke-width="1"/>
+                    <ellipse cx="100" cy="95" rx="60" ry="25" fill="none" stroke="currentColor" stroke-width="0.5" stroke-dasharray="2,2"/>
+                    <line x1="25" y1="100" x2="25" y2="105" stroke="currentColor" stroke-width="1"/>
+                    <line x1="175" y1="100" x2="175" y2="105" stroke="currentColor" stroke-width="1"/>
+                </svg>
+            </div>
+            <div class="product-content">
+                <h3 class="product-name">Capsule</h3>
+                <p class="product-tagline">"Clean, precise form" — Timeless vessel design</p>
+                <div class="product-specs-mini">
+                    <div class="spec-mini">
+                        <div class="spec-mini-value">580×380</div>
+                        <div class="spec-mini-label">L × W mm</div>
+                    </div>
+                    <div class="spec-mini">
+                        <div class="spec-mini-value">145</div>
+                        <div class="spec-mini-label">Height mm</div>
+                    </div>
+                    <div class="spec-mini">
+                        <div class="spec-mini-value">24</div>
+                        <div class="spec-mini-label">Weight kg</div>
+                    </div>
+                </div>
+                <div class="product-cta">
+                    <a href="#specs" class="btn-primary">Full Specs</a>
+                    <a href="#" class="btn-secondary">CAD Files</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bowl -->
+        <div class="product-card" data-product="bowl">
+            <div class="product-image">
+                <div class="product-badge">Countertop</div>
+                <svg viewBox="0 0 200 200">
+                    <circle cx="100" cy="100" r="65" fill="none" stroke="currentColor" stroke-width="1"/>
+                    <ellipse cx="100" cy="100" rx="65" ry="20" fill="none" stroke="currentColor" stroke-width="1"/>
+                    <ellipse cx="100" cy="90" rx="50" ry="15" fill="none" stroke="currentColor" stroke-width="0.5" stroke-dasharray="2,2"/>
+                </svg>
+            </div>
+            <div class="product-content">
+                <h3 class="product-name">Bowl</h3>
+                <p class="product-tagline">"Pure geometry" — Essential round form</p>
+                <div class="product-specs-mini">
+                    <div class="spec-mini">
+                        <div class="spec-mini-value">Ø420</div>
+                        <div class="spec-mini-label">Diameter</div>
+                    </div>
+                    <div class="spec-mini">
+                        <div class="spec-mini-value">140</div>
+                        <div class="spec-mini-label">Height mm</div>
+                    </div>
+                    <div class="spec-mini">
+                        <div class="spec-mini-value">18</div>
+                        <div class="spec-mini-label">Weight kg</div>
+                    </div>
+                </div>
+                <div class="product-cta">
+                    <a href="#specs" class="btn-primary">Full Specs</a>
+                    <a href="#" class="btn-secondary">CAD Files</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Noah (Wall-hung) -->
+        <div class="product-card" data-product="noah">
+            <div class="product-image">
+                <div class="product-badge">Wall-Hung</div>
+                <svg viewBox="0 0 200 200">
+                    <!-- Wall-hung basin -->
+                    <line x1="20" y1="70" x2="180" y2="70" stroke="currentColor" stroke-width="2"/>
+                    <ellipse cx="100" cy="110" rx="70" ry="30" fill="none" stroke="currentColor" stroke-width="1"/>
+                    <path d="M30 90 Q30 110 40 130 L160 130 Q170 110 170 90" fill="none" stroke="currentColor" stroke-width="1"/>
+                    <ellipse cx="100" cy="100" rx="55" ry="20" fill="none" stroke="currentColor" stroke-width="0.5" stroke-dasharray="2,2"/>
+                </svg>
+            </div>
+            <div class="product-content">
+                <h3 class="product-name">Noah</h3>
+                <p class="product-tagline">"Sculptural, functional" — Floating elegance</p>
+                <div class="product-specs-mini">
+                    <div class="spec-mini">
+                        <div class="spec-mini-value">550×400</div>
+                        <div class="spec-mini-label">L × W mm</div>
+                    </div>
+                    <div class="spec-mini">
+                        <div class="spec-mini-value">180</div>
+                        <div class="spec-mini-label">Height mm</div>
+                    </div>
+                    <div class="spec-mini">
+                        <div class="spec-mini-value">28</div>
+                        <div class="spec-mini-label">Weight kg</div>
+                    </div>
+                </div>
+                <div class="product-cta">
+                    <a href="#specs" class="btn-primary">Full Specs</a>
+                    <a href="#" class="btn-secondary">CAD Files</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Technical Specifications -->
+<section class="specs-section" id="specs">
+    <div class="specs-container">
+        <div class="section-header">
+            <span class="section-number" style="color: var(--terracotta);">02 — Technical Specifications</span>
+            <h2>Architect-Grade Documentation</h2>
+        </div>
+
+        <!-- Tondo Specs -->
+        <div class="spec-product">
+            <div class="technical-drawing">
+                <span class="drawing-label">Front Elevation + Plan View — Scale 1:10</span>
+                <svg class="schematic" viewBox="0 0 420 400">
+                    <!-- Title block -->
+                    <rect x="5" y="5" width="410" height="390" fill="none" stroke="rgba(200,200,200,0.3)" stroke-width="0.5"/>
+
+                    <!-- FRONT ELEVATION -->
+                    <text x="85" y="22" font-size="10" fill="#C4A484" font-weight="500">FRONT ELEVATION</text>
+                    <line x1="30" y1="26" x2="170" y2="26" stroke="#C4A484" stroke-width="0.3"/>
+
+                    <!-- Center line (vertical) -->
+                    <line x1="100" y1="35" x2="100" y2="185" stroke="#C4A484" stroke-width="0.3" stroke-dasharray="8,2,2,2"/>
+
+                    <!-- Basin rim - outer profile -->
+                    <ellipse cx="100" cy="50" rx="58" ry="20"/>
+                    <ellipse cx="100" cy="52" rx="58" ry="20"/>
+
+                    <!-- Basin interior depression -->
+                    <ellipse cx="100" cy="52" rx="46" ry="14" stroke-dasharray="4,2" stroke-width="0.7"/>
+
+                    <!-- Pedestal body with realistic curves -->
+                    <path d="M42 52 Q40 75 42 95 Q44 115 52 135 L52 165 Q52 172 58 172 L142 172 Q148 172 148 165 L148 135 Q156 115 158 95 Q160 75 158 52" stroke-width="1"/>
+
+                    <!-- Internal cavity (hidden line) -->
+                    <path d="M58 60 L58 130 Q58 140 68 140 L132 140 Q142 140 142 130 L142 60" stroke-dasharray="3,2" stroke-width="0.5"/>
+
+                    <!-- Basin drain detail -->
+                    <circle cx="100" cy="58" r="16" stroke-dasharray="2,1" stroke-width="0.5"/>
+
+                    <!-- Base plate -->
+                    <rect x="55" y="172" width="90" height="6"/>
+                    <line x1="55" y1="175" x2="145" y2="175" stroke-width="0.3"/>
+
+                    <!-- Floor line -->
+                    <line x1="25" y1="178" x2="175" y2="178" stroke-width="1.5"/>
+                    <line x1="30" y1="182" x2="50" y2="178"/>
+                    <line x1="55" y1="182" x2="75" y2="178"/>
+                    <line x1="80" y1="182" x2="100" y2="178"/>
+                    <line x1="105" y1="182" x2="125" y2="178"/>
+                    <line x1="130" y1="182" x2="150" y2="178"/>
+                    <line x1="155" y1="182" x2="170" y2="178"/>
+
+                    <!-- Dimension: Overall Height -->
+                    <line x1="180" y1="50" x2="195" y2="50" stroke-width="0.3"/>
+                    <line x1="180" y1="178" x2="195" y2="178" stroke-width="0.3"/>
+                    <line x1="190" y1="50" x2="190" y2="178" class="dimension-line"/>
+                    <polygon points="190,52 188,58 192,58" fill="#C4A484"/>
+                    <polygon points="190,176 188,170 192,170" fill="#C4A484"/>
+                    <text x="195" y="118" class="dimension-text" font-size="10">850</text>
+
+                    <!-- Dimension: Basin diameter -->
+                    <line x1="42" y1="35" x2="42" y2="28" stroke-width="0.3"/>
+                    <line x1="158" y1="35" x2="158" y2="28" stroke-width="0.3"/>
+                    <line x1="42" y1="32" x2="158" y2="32" class="dimension-line"/>
+                    <polygon points="44,32 50,30 50,34" fill="#C4A484"/>
+                    <polygon points="156,32 150,30 150,34" fill="#C4A484"/>
+                    <text x="88" y="28" class="dimension-text" font-size="10">Ø450</text>
+
+                    <!-- Dimension: Base width -->
+                    <line x1="55" y1="188" x2="55" y2="195" stroke-width="0.3"/>
+                    <line x1="145" y1="188" x2="145" y2="195" stroke-width="0.3"/>
+                    <line x1="55" y1="192" x2="145" y2="192" class="dimension-line"/>
+                    <text x="90" y="202" class="dimension-text" font-size="9">Ø200</text>
+
+                    <!-- PLAN VIEW -->
+                    <text x="290" y="22" font-size="10" fill="#C4A484" font-weight="500">PLAN VIEW</text>
+                    <line x1="245" y1="26" x2="355" y2="26" stroke="#C4A484" stroke-width="0.3"/>
+
+                    <!-- Center lines -->
+                    <line x1="300" y1="40" x2="300" y2="150" stroke="#C4A484" stroke-width="0.3" stroke-dasharray="8,2,2,2"/>
+                    <line x1="240" y1="95" x2="360" y2="95" stroke="#C4A484" stroke-width="0.3" stroke-dasharray="8,2,2,2"/>
+
+                    <!-- Basin outer rim -->
+                    <circle cx="300" cy="95" r="58"/>
+
+                    <!-- Basin inner edge -->
+                    <circle cx="300" cy="95" r="46" stroke-dasharray="4,2"/>
+
+                    <!-- Waste outlet -->
+                    <circle cx="300" cy="95" r="16"/>
+                    <circle cx="300" cy="95" r="12" stroke-dasharray="2,1" stroke-width="0.5"/>
+                    <text x="288" y="70" font-size="8" fill="#9CA3AF">Ø32 WASTE</text>
+
+                    <!-- BASE PLAN -->
+                    <text x="290" y="175" font-size="10" fill="#C4A484" font-weight="500">BASE FOOTPRINT</text>
+
+                    <circle cx="300" cy="220" r="25" stroke-width="0.8"/>
+                    <!-- Fixing holes -->
+                    <circle cx="287" cy="220" r="4" fill="none"/>
+                    <circle cx="313" cy="220" r="4" fill="none"/>
+                    <line x1="287" y1="216" x2="287" y2="224" stroke-width="0.3"/>
+                    <line x1="283" y1="220" x2="291" y2="220" stroke-width="0.3"/>
+                    <line x1="313" y1="216" x2="313" y2="224" stroke-width="0.3"/>
+                    <line x1="309" y1="220" x2="317" y2="220" stroke-width="0.3"/>
+                    <text x="270" y="245" font-size="7" fill="#9CA3AF">M8 FIXING × 2</text>
+                    <text x="270" y="255" font-size="7" fill="#9CA3AF">100mm CTRS</text>
+
+                    <!-- SECTION A-A -->
+                    <text x="70" y="225" font-size="10" fill="#C4A484" font-weight="500">SECTION A-A</text>
+
+                    <!-- Section profile with hatching -->
+                    <path d="M40 250 L40 240 Q100 230 160 240 L160 250" stroke-width="0.8"/>
+                    <path d="M50 250 L50 245 Q100 238 150 245 L150 250" stroke-dasharray="2,1" stroke-width="0.5"/>
+
+                    <!-- Wall thickness hatching -->
+                    <line x1="42" y1="242" x2="48" y2="248" stroke-width="0.3"/>
+                    <line x1="46" y1="242" x2="52" y2="248" stroke-width="0.3"/>
+                    <line x1="152" y1="242" x2="158" y2="248" stroke-width="0.3"/>
+                    <line x1="148" y1="242" x2="154" y2="248" stroke-width="0.3"/>
+
+                    <!-- Pedestal section -->
+                    <rect x="55" y="270" width="10" height="80" stroke-width="0.8"/>
+                    <rect x="135" y="270" width="10" height="80" stroke-width="0.8"/>
+
+                    <!-- Section hatching for pedestal walls -->
+                    <g stroke-width="0.25">
+                        <line x1="56" y1="272" x2="64" y2="280"/>
+                        <line x1="56" y1="280" x2="64" y2="288"/>
+                        <line x1="56" y1="288" x2="64" y2="296"/>
+                        <line x1="56" y1="296" x2="64" y2="304"/>
+                        <line x1="56" y1="304" x2="64" y2="312"/>
+                        <line x1="56" y1="312" x2="64" y2="320"/>
+                        <line x1="56" y1="320" x2="64" y2="328"/>
+                        <line x1="56" y1="328" x2="64" y2="336"/>
+                        <line x1="56" y1="336" x2="64" y2="344"/>
+                        <line x1="56" y1="344" x2="64" y2="350"/>
+                        <line x1="136" y1="272" x2="144" y2="280"/>
+                        <line x1="136" y1="280" x2="144" y2="288"/>
+                        <line x1="136" y1="288" x2="144" y2="296"/>
+                        <line x1="136" y1="296" x2="144" y2="304"/>
+                        <line x1="136" y1="304" x2="144" y2="312"/>
+                        <line x1="136" y1="312" x2="144" y2="320"/>
+                        <line x1="136" y1="320" x2="144" y2="328"/>
+                        <line x1="136" y1="328" x2="144" y2="336"/>
+                        <line x1="136" y1="336" x2="144" y2="344"/>
+                        <line x1="136" y1="344" x2="144" y2="350"/>
+                    </g>
+
+                    <!-- Wall thickness dimension -->
+                    <text x="68" y="310" font-size="7" fill="#9CA3AF">WALL: 25mm</text>
+
+                    <!-- Notes box -->
+                    <rect x="220" y="270" width="180" height="115" fill="rgba(45,45,45,0.3)" stroke="rgba(200,200,200,0.2)"/>
+                    <text x="230" y="288" font-size="9" fill="#C4A484">NOTES:</text>
+                    <text x="230" y="305" font-size="8" fill="#E8E4DF">1. MATERIAL: DURONITE 423™</text>
+                    <text x="230" y="318" font-size="8" fill="#E8E4DF">2. WASTE: 32mm POP-UP OR P&W</text>
+                    <text x="230" y="331" font-size="8" fill="#E8E4DF">3. TAPWARE: WALL MOUNTED</text>
+                    <text x="230" y="344" font-size="8" fill="#E8E4DF">4. FFL TO RIM: 850mm</text>
+                    <text x="230" y="357" font-size="8" fill="#E8E4DF">5. MIN WALL CLEARANCE: 50mm</text>
+                    <text x="230" y="370" font-size="8" fill="#E8E4DF">6. SILICONE BED TO FLOOR</text>
+
+                    <!-- Scale indicator -->
+                    <text x="310" y="388" font-size="8" fill="#9CA3AF">SCALE 1:10 @ A3</text>
+                </svg>
+            </div>
+            <div class="spec-details">
+                <h3>Tondo</h3>
+                <p class="tagline">Round Pedestal Basin — Commercial Grade</p>
+
+                <div class="spec-category">Dimensions</div>
+                <div class="spec-table">
+                    <div class="spec-row">
+                        <span class="spec-label">Overall Height</span>
+                        <span class="spec-value">850 mm</span>
+                    </div>
+                    <div class="spec-row">
+                        <span class="spec-label">Basin Diameter</span>
+                        <span class="spec-value">450 mm</span>
+                    </div>
+                    <div class="spec-row">
+                        <span class="spec-label">Basin Depth</span>
+                        <span class="spec-value">145 mm</span>
+                    </div>
+                    <div class="spec-row">
+                        <span class="spec-label">Base Diameter</span>
+                        <span class="spec-value">200 mm</span>
+                    </div>
+                    <div class="spec-row">
+                        <span class="spec-label">Wall Clearance (min)</span>
+                        <span class="spec-value">50 mm</span>
+                    </div>
+                </div>
+
+                <div class="spec-category">Technical</div>
+                <div class="spec-table">
+                    <div class="spec-row">
+                        <span class="spec-label">Weight</span>
+                        <span class="spec-value">62 kg</span>
+                    </div>
+                    <div class="spec-row">
+                        <span class="spec-label">Material</span>
+                        <span class="spec-value">Duronite 423™</span>
+                    </div>
+                    <div class="spec-row">
+                        <span class="spec-label">Waste Outlet</span>
+                        <span class="spec-value">32 mm</span>
+                    </div>
+                    <div class="spec-row">
+                        <span class="spec-label">Tapware</span>
+                        <span class="spec-value">Wall-mounted</span>
+                    </div>
+                    <div class="spec-row">
+                        <span class="spec-label">Overflow</span>
+                        <span class="spec-value">Not included</span>
+                    </div>
+                </div>
+
+                <div class="spec-category">Installation</div>
+                <div class="spec-table">
+                    <div class="spec-row">
+                        <span class="spec-label">Floor Fixing</span>
+                        <span class="spec-value">M8 bolts × 2</span>
+                    </div>
+                    <div class="spec-row">
+                        <span class="spec-label">Fixing Centres</span>
+                        <span class="spec-value">100 mm</span>
+                    </div>
+                    <div class="spec-row">
+                        <span class="spec-label">Floor Load</span>
+                        <span class="spec-value">75 kg (filled)</span>
+                    </div>
+                </div>
+
+                <a href="#" class="download-specs">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    Download CAD + Spec Sheet
+                </a>
+            </div>
+        </div>
+
+        <!-- Ovale Specs -->
+        <div class="spec-product">
+            <div class="technical-drawing">
+                <span class="drawing-label">Front & Side Elevation — Scale 1:10</span>
+                <svg class="schematic" viewBox="0 0 420 400">
+                    <!-- Title block border -->
+                    <rect x="5" y="5" width="410" height="390" fill="none" stroke="rgba(200,200,200,0.3)" stroke-width="0.5"/>
+
+                    <!-- FRONT ELEVATION -->
+                    <text x="70" y="22" font-size="10" fill="#C4A484" font-weight="500">FRONT ELEVATION</text>
+                    <line x1="20" y1="26" x2="160" y2="26" stroke="#C4A484" stroke-width="0.3"/>
+
+                    <!-- Center line -->
+                    <line x1="90" y1="35" x2="90" y2="190" stroke="#C4A484" stroke-width="0.3" stroke-dasharray="8,2,2,2"/>
+
+                    <!-- Basin rim - oval profile -->
+                    <ellipse cx="90" cy="50" rx="68" ry="22"/>
+                    <ellipse cx="90" cy="53" rx="68" ry="22"/>
+
+                    <!-- Basin interior -->
+                    <ellipse cx="90" cy="53" rx="54" ry="16" stroke-dasharray="4,2" stroke-width="0.7"/>
+
+                    <!-- Pedestal body - elegant curves -->
+                    <path d="M22 53 Q18 80 22 105 Q28 130 42 150 L42 168 Q42 175 50 175 L130 175 Q138 175 138 168 L138 150 Q152 130 158 105 Q162 80 158 53" stroke-width="1"/>
+
+                    <!-- Internal cavity (hidden) -->
+                    <path d="M38 62 L38 135 Q38 145 48 145 L132 145 Q142 145 142 135 L142 62" stroke-dasharray="3,2" stroke-width="0.5"/>
+
+                    <!-- Drain -->
+                    <circle cx="90" cy="58" r="20" stroke-dasharray="2,1" stroke-width="0.5"/>
+
+                    <!-- Base plate -->
+                    <rect x="38" y="175" width="104" height="5"/>
+
+                    <!-- Floor line with hatching -->
+                    <line x1="10" y1="180" x2="170" y2="180" stroke-width="1.5"/>
+                    <g stroke-width="0.5">
+                        <line x1="15" y1="185" x2="30" y2="180"/>
+                        <line x1="35" y1="185" x2="50" y2="180"/>
+                        <line x1="55" y1="185" x2="70" y2="180"/>
+                        <line x1="75" y1="185" x2="90" y2="180"/>
+                        <line x1="95" y1="185" x2="110" y2="180"/>
+                        <line x1="115" y1="185" x2="130" y2="180"/>
+                        <line x1="135" y1="185" x2="150" y2="180"/>
+                        <line x1="155" y1="185" x2="165" y2="180"/>
+                    </g>
+
+                    <!-- Dimension: Height -->
+                    <line x1="175" y1="50" x2="188" y2="50" stroke-width="0.3"/>
+                    <line x1="175" y1="180" x2="188" y2="180" stroke-width="0.3"/>
+                    <line x1="183" y1="50" x2="183" y2="180" class="dimension-line"/>
+                    <polygon points="183,52 181,58 185,58" fill="#C4A484"/>
+                    <polygon points="183,178 181,172 185,172" fill="#C4A484"/>
+                    <text x="188" y="118" class="dimension-text" font-size="10">860</text>
+
+                    <!-- Dimension: Width -->
+                    <line x1="22" y1="35" x2="22" y2="28" stroke-width="0.3"/>
+                    <line x1="158" y1="35" x2="158" y2="28" stroke-width="0.3"/>
+                    <line x1="22" y1="32" x2="158" y2="32" class="dimension-line"/>
+                    <polygon points="24,32 30,30 30,34" fill="#C4A484"/>
+                    <polygon points="156,32 150,30 150,34" fill="#C4A484"/>
+                    <text x="78" y="28" class="dimension-text" font-size="10">600</text>
+
+                    <!-- SIDE ELEVATION -->
+                    <text x="280" y="22" font-size="10" fill="#C4A484" font-weight="500">SIDE ELEVATION</text>
+                    <line x1="230" y1="26" x2="370" y2="26" stroke="#C4A484" stroke-width="0.3"/>
+
+                    <!-- Center line -->
+                    <line x1="300" y1="35" x2="300" y2="190" stroke="#C4A484" stroke-width="0.3" stroke-dasharray="8,2,2,2"/>
+
+                    <!-- Side profile -->
+                    <ellipse cx="300" cy="50" rx="48" ry="22"/>
+                    <ellipse cx="300" cy="53" rx="48" ry="22"/>
+                    <ellipse cx="300" cy="53" rx="36" ry="16" stroke-dasharray="4,2" stroke-width="0.7"/>
+
+                    <!-- Pedestal side -->
+                    <path d="M252 53 Q248 85 255 115 Q262 140 272 155 L272 168 Q272 175 280 175 L320 175 Q328 175 328 168 L328 155 Q338 140 345 115 Q352 85 348 53" stroke-width="1"/>
+
+                    <!-- Base -->
+                    <rect x="268" y="175" width="64" height="5"/>
+                    <line x1="240" y1="180" x2="360" y2="180" stroke-width="1.5"/>
+
+                    <!-- Dimension: Depth -->
+                    <line x1="252" y1="195" x2="252" y2="202" stroke-width="0.3"/>
+                    <line x1="348" y1="195" x2="348" y2="202" stroke-width="0.3"/>
+                    <line x1="252" y1="198" x2="348" y2="198" class="dimension-line"/>
+                    <text x="288" y="208" class="dimension-text" font-size="10">420</text>
+
+                    <!-- PLAN VIEW -->
+                    <text x="70" y="215" font-size="10" fill="#C4A484" font-weight="500">PLAN VIEW</text>
+                    <line x1="20" y1="219" x2="160" y2="219" stroke="#C4A484" stroke-width="0.3"/>
+
+                    <!-- Center lines -->
+                    <line x1="90" y1="230" x2="90" y2="330" stroke="#C4A484" stroke-width="0.3" stroke-dasharray="8,2,2,2"/>
+                    <line x1="20" y1="280" x2="160" y2="280" stroke="#C4A484" stroke-width="0.3" stroke-dasharray="8,2,2,2"/>
+
+                    <!-- Oval plan -->
+                    <ellipse cx="90" cy="280" rx="68" ry="48"/>
+                    <ellipse cx="90" cy="280" rx="54" ry="36" stroke-dasharray="4,2"/>
+
+                    <!-- Waste -->
+                    <circle cx="90" cy="280" r="20"/>
+                    <circle cx="90" cy="280" r="16" stroke-dasharray="2,1" stroke-width="0.5"/>
+                    <text x="78" y="255" font-size="8" fill="#9CA3AF">Ø40 WASTE</text>
+
+                    <!-- Plan dimensions -->
+                    <line x1="22" y1="340" x2="158" y2="340" class="dimension-line"/>
+                    <text x="78" y="352" class="dimension-text" font-size="9">600</text>
+                    <line x1="170" y1="232" x2="170" y2="328" class="dimension-line"/>
+                    <text x="175" y="285" class="dimension-text" font-size="9">420</text>
+
+                    <!-- ROUGH-IN DIAGRAM -->
+                    <text x="280" y="215" font-size="10" fill="#C4A484" font-weight="500">PLUMBING ROUGH-IN</text>
+
+                    <!-- Rough-in box -->
+                    <rect x="245" y="235" width="110" height="90" fill="none" stroke-dasharray="4,2"/>
+
+                    <!-- Services positions -->
+                    <circle cx="300" cy="300" r="8" fill="none"/>
+                    <line x1="296" y1="296" x2="304" y2="304" stroke-width="0.5"/>
+                    <line x1="304" y1="296" x2="296" y2="304" stroke-width="0.5"/>
+                    <text x="312" y="305" font-size="8" fill="#9CA3AF">WASTE</text>
+
+                    <!-- Hot/Cold indicators -->
+                    <circle cx="280" cy="250" r="5" fill="none"/>
+                    <text x="268" y="242" font-size="7" fill="#E8A091">HOT</text>
+                    <circle cx="320" cy="250" r="5" fill="none"/>
+                    <text x="308" y="242" font-size="7" fill="#89B4C8">COLD</text>
+
+                    <!-- Rough-in dimensions -->
+                    <text x="250" y="340" font-size="8" fill="#9CA3AF">WASTE: 300mm FROM WALL</text>
+                    <text x="250" y="352" font-size="8" fill="#9CA3AF">SUPPLIES: 400mm AFF</text>
+
+                    <!-- Notes -->
+                    <rect x="245" y="360" width="160" height="30" fill="rgba(45,45,45,0.3)" stroke="rgba(200,200,200,0.2)"/>
+                    <text x="252" y="375" font-size="8" fill="#E8E4DF">CAPACITY: 12L | WEIGHT: 78kg</text>
+                    <text x="252" y="385" font-size="7" fill="#9CA3AF">SCALE 1:10 @ A3</text>
+                </svg>
+            </div>
+            <div class="spec-details">
+                <h3>Ovale</h3>
+                <p class="tagline">Oval Pedestal Basin — Statement Piece</p>
+
+                <div class="spec-category">Dimensions</div>
+                <div class="spec-table">
+                    <div class="spec-row">
+                        <span class="spec-label">Overall Height</span>
+                        <span class="spec-value">860 mm</span>
+                    </div>
+                    <div class="spec-row">
+                        <span class="spec-label">Length</span>
+                        <span class="spec-value">600 mm</span>
+                    </div>
+                    <div class="spec-row">
+                        <span class="spec-label">Width</span>
+                        <span class="spec-value">420 mm</span>
+                    </div>
+                    <div class="spec-row">
+                        <span class="spec-label">Basin Depth</span>
+                        <span class="spec-value">155 mm</span>
+                    </div>
+                    <div class="spec-row">
+                        <span class="spec-label">Base Footprint</span>
+                        <span class="spec-value">280 × 180 mm</span>
+                    </div>
+                </div>
+
+                <div class="spec-category">Technical</div>
+                <div class="spec-table">
+                    <div class="spec-row">
+                        <span class="spec-label">Weight</span>
+                        <span class="spec-value">78 kg</span>
+                    </div>
+                    <div class="spec-row">
+                        <span class="spec-label">Material</span>
+                        <span class="spec-value">Duronite 423™</span>
+                    </div>
+                    <div class="spec-row">
+                        <span class="spec-label">Waste Outlet</span>
+                        <span class="spec-value">40 mm</span>
+                    </div>
+                    <div class="spec-row">
+                        <span class="spec-label">Capacity</span>
+                        <span class="spec-value">12 litres</span>
+                    </div>
+                </div>
+
+                <a href="#" class="download-specs">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    Download CAD + Spec Sheet
+                </a>
+            </div>
+        </div>
+
+        <!-- Capsule Specs (Countertop) -->
+        <div class="spec-product">
+            <div class="technical-drawing">
+                <span class="drawing-label">Countertop Installation — Scale 1:5</span>
+                <svg class="schematic" viewBox="0 0 420 400">
+                    <!-- Border -->
+                    <rect x="5" y="5" width="410" height="390" fill="none" stroke="rgba(200,200,200,0.3)" stroke-width="0.5"/>
+
+                    <!-- SECTION A-A (Main detail) -->
+                    <text x="75" y="22" font-size="10" fill="#C4A484" font-weight="500">SECTION A-A</text>
+                    <line x1="20" y1="26" x2="175" y2="26" stroke="#C4A484" stroke-width="0.3"/>
+
+                    <!-- Center line -->
+                    <line x1="100" y1="35" x2="100" y2="150" stroke="#C4A484" stroke-width="0.3" stroke-dasharray="8,2,2,2"/>
+
+                    <!-- Benchtop structure -->
+                    <rect x="15" y="100" width="170" height="25" fill="none" stroke-width="1"/>
+                    <!-- Benchtop hatching -->
+                    <g stroke-width="0.25" stroke="#9CA3AF">
+                        <line x1="17" y1="102" x2="25" y2="123"/>
+                        <line x1="27" y1="102" x2="35" y2="123"/>
+                        <line x1="37" y1="102" x2="45" y2="123"/>
+                        <line x1="47" y1="102" x2="55" y2="123"/>
+                        <line x1="145" y1="102" x2="153" y2="123"/>
+                        <line x1="155" y1="102" x2="163" y2="123"/>
+                        <line x1="165" y1="102" x2="173" y2="123"/>
+                        <line x1="175" y1="102" x2="183" y2="123"/>
+                    </g>
+                    <text x="18" y="115" font-size="7" fill="#9CA3AF">STONE/SOLID</text>
+                    <text x="18" y="122" font-size="7" fill="#9CA3AF">SURFACE</text>
+
+                    <!-- Cutout in benchtop -->
+                    <line x1="58" y1="100" x2="58" y2="108" stroke-width="0.8"/>
+                    <line x1="142" y1="100" x2="142" y2="108" stroke-width="0.8"/>
+
+                    <!-- Basin profile - detailed cross-section -->
+                    <path d="M35 100 L35 75 Q35 55 55 48 Q100 35 145 48 Q165 55 165 75 L165 100" stroke-width="1"/>
+
+                    <!-- Basin interior profile -->
+                    <path d="M45 98 L45 78 Q45 62 62 56 Q100 46 138 56 Q155 62 155 78 L155 98" stroke-dasharray="3,2" stroke-width="0.6"/>
+
+                    <!-- Wall thickness indicators -->
+                    <g stroke-width="0.25">
+                        <line x1="36" y1="76" x2="44" y2="84"/>
+                        <line x1="38" y1="74" x2="46" y2="82"/>
+                        <line x1="40" y1="72" x2="48" y2="80"/>
+                        <line x1="156" y1="76" x2="164" y2="84"/>
+                        <line x1="158" y1="74" x2="166" y2="82"/>
+                        <line x1="160" y1="72" x2="168" y2="80"/>
+                    </g>
+
+                    <!-- Waste outlet detail -->
+                    <rect x="85" y="98" width="30" height="15" fill="none" stroke-width="0.8"/>
+                    <circle cx="100" cy="98" r="16" stroke-dasharray="2,1" stroke-width="0.5"/>
+                    <text x="115" y="118" font-size="7" fill="#9CA3AF">40mm WASTE</text>
+
+                    <!-- Silicone bead -->
+                    <ellipse cx="48" cy="100" rx="3" ry="2" fill="#C4A484" opacity="0.5"/>
+                    <ellipse cx="152" cy="100" rx="3" ry="2" fill="#C4A484" opacity="0.5"/>
+                    <text x="25" y="98" font-size="6" fill="#C4A484">SILICONE</text>
+
+                    <!-- Dimension: Basin height above bench -->
+                    <line x1="180" y1="48" x2="193" y2="48" stroke-width="0.3"/>
+                    <line x1="180" y1="100" x2="193" y2="100" stroke-width="0.3"/>
+                    <line x1="188" y1="48" x2="188" y2="100" class="dimension-line"/>
+                    <polygon points="188,50 186,56 190,56" fill="#C4A484"/>
+                    <polygon points="188,98 186,92 190,92" fill="#C4A484"/>
+                    <text x="193" y="78" class="dimension-text" font-size="10">145</text>
+
+                    <!-- Dimension: Overall width -->
+                    <line x1="35" y1="35" x2="35" y2="28" stroke-width="0.3"/>
+                    <line x1="165" y1="35" x2="165" y2="28" stroke-width="0.3"/>
+                    <line x1="35" y1="32" x2="165" y2="32" class="dimension-line"/>
+                    <text x="88" y="28" class="dimension-text" font-size="10">580</text>
+
+                    <!-- Dimension: Bench thickness -->
+                    <line x1="8" y1="100" x2="8" y2="125" class="dimension-line"/>
+                    <text x="2" y="115" class="dimension-text" font-size="8" transform="rotate(-90, 8, 115)">25</text>
+
+                    <!-- PLAN VIEW -->
+                    <text x="75" y="160" font-size="10" fill="#C4A484" font-weight="500">PLAN VIEW</text>
+                    <line x1="20" y1="164" x2="175" y2="164" stroke="#C4A484" stroke-width="0.3"/>
+
+                    <!-- Center lines -->
+                    <line x1="100" y1="175" x2="100" y2="290" stroke="#C4A484" stroke-width="0.3" stroke-dasharray="8,2,2,2"/>
+                    <line x1="25" y1="235" x2="175" y2="235" stroke="#C4A484" stroke-width="0.3" stroke-dasharray="8,2,2,2"/>
+
+                    <!-- Outer oval -->
+                    <ellipse cx="100" cy="235" rx="72" ry="50"/>
+
+                    <!-- Inner basin edge -->
+                    <ellipse cx="100" cy="235" rx="58" ry="38" stroke-dasharray="4,2"/>
+
+                    <!-- Waste outlet -->
+                    <circle cx="100" cy="235" r="20"/>
+                    <circle cx="100" cy="235" r="16" stroke-dasharray="2,1" stroke-width="0.5"/>
+
+                    <!-- Section cut line A-A -->
+                    <line x1="20" y1="235" x2="30" y2="235" stroke-width="1.5"/>
+                    <line x1="170" y1="235" x2="180" y2="235" stroke-width="1.5"/>
+                    <circle cx="25" cy="235" r="8" fill="none" stroke-width="0.8"/>
+                    <text x="22" y="238" font-size="8" fill="#E8E4DF">A</text>
+                    <circle cx="175" cy="235" r="8" fill="none" stroke-width="0.8"/>
+                    <text x="172" y="238" font-size="8" fill="#E8E4DF">A</text>
+
+                    <!-- Plan dimensions -->
+                    <line x1="28" y1="185" x2="172" y2="185" class="dimension-line"/>
+                    <text x="90" y="181" class="dimension-text" font-size="9">580</text>
+
+                    <line x1="185" y1="185" x2="185" y2="285" class="dimension-line"/>
+                    <text x="190" y="238" class="dimension-text" font-size="9">380</text>
+
+                    <!-- BENCHTOP CUTOUT TEMPLATE -->
+                    <text x="280" y="22" font-size="10" fill="#C4A484" font-weight="500">CUTOUT TEMPLATE</text>
+                    <line x1="220" y1="26" x2="380" y2="26" stroke="#C4A484" stroke-width="0.3"/>
+
+                    <!-- Cutout shape -->
+                    <ellipse cx="300" cy="80" rx="55" ry="35" stroke-dasharray="5,3" stroke-width="1.2"/>
+
+                    <!-- Center mark -->
+                    <line x1="295" y1="75" x2="305" y2="85" stroke-width="0.5"/>
+                    <line x1="305" y1="75" x2="295" y2="85" stroke-width="0.5"/>
+                    <circle cx="300" cy="80" r="3" fill="none" stroke-width="0.5"/>
+
+                    <!-- Waste hole -->
+                    <circle cx="300" cy="80" r="22" fill="none"/>
+                    <text x="288" y="60" font-size="8" fill="#9CA3AF">Ø44 WASTE</text>
+
+                    <!-- Cutout dimension -->
+                    <line x1="245" y1="120" x2="355" y2="120" class="dimension-line"/>
+                    <text x="287" y="132" class="dimension-text" font-size="9">Ø110</text>
+
+                    <!-- INSTALLATION NOTES -->
+                    <rect x="220" y="150" width="185" height="120" fill="rgba(45,45,45,0.3)" stroke="rgba(200,200,200,0.2)"/>
+                    <text x="230" y="168" font-size="9" fill="#C4A484" font-weight="500">INSTALLATION NOTES</text>
+
+                    <text x="230" y="188" font-size="8" fill="#E8E4DF">1. Min benchtop thickness: 20mm</text>
+                    <text x="230" y="202" font-size="8" fill="#E8E4DF">2. Cut hole per template (Ø110mm)</text>
+                    <text x="230" y="216" font-size="8" fill="#E8E4DF">3. Apply silicone bead to rim edge</text>
+                    <text x="230" y="230" font-size="8" fill="#E8E4DF">4. Position basin over cutout</text>
+                    <text x="230" y="244" font-size="8" fill="#E8E4DF">5. Connect 40mm waste (below)</text>
+                    <text x="230" y="258" font-size="8" fill="#E8E4DF">6. Wall-mounted tap required</text>
+
+                    <!-- Specification box -->
+                    <rect x="220" y="280" width="185" height="70" fill="rgba(45,45,45,0.4)" stroke="rgba(200,200,200,0.2)"/>
+                    <text x="230" y="298" font-size="9" fill="#C4A484" font-weight="500">SPECIFICATIONS</text>
+                    <text x="230" y="315" font-size="8" fill="#E8E4DF">Material: Duronite 423™</text>
+                    <text x="230" y="328" font-size="8" fill="#E8E4DF">Weight: 24kg</text>
+                    <text x="230" y="341" font-size="8" fill="#E8E4DF">Capacity: 8 litres</text>
+
+                    <!-- Warranty badge -->
+                    <circle cx="370" cy="320" r="22" fill="none" stroke="#C4A484" stroke-width="1"/>
+                    <text x="358" y="317" font-size="10" fill="#C4A484" font-weight="500">10</text>
+                    <text x="356" y="328" font-size="6" fill="#9CA3AF">YEAR</text>
+
+                    <!-- Scale indicator -->
+                    <text x="320" y="388" font-size="8" fill="#9CA3AF">SCALE 1:5 @ A3</text>
+                </svg>
+            </div>
+            <div class="spec-details">
+                <h3>Capsule</h3>
+                <p class="tagline">Oval Countertop Vessel — Above-Counter</p>
+
+                <div class="spec-category">Dimensions</div>
+                <div class="spec-table">
+                    <div class="spec-row">
+                        <span class="spec-label">Length</span>
+                        <span class="spec-value">580 mm</span>
+                    </div>
+                    <div class="spec-row">
+                        <span class="spec-label">Width</span>
+                        <span class="spec-value">380 mm</span>
+                    </div>
+                    <div class="spec-row">
+                        <span class="spec-label">Height</span>
+                        <span class="spec-value">145 mm</span>
+                    </div>
+                    <div class="spec-row">
+                        <span class="spec-label">Benchtop Cutout</span>
+                        <span class="spec-value">Ø110 mm</span>
+                    </div>
+                    <div class="spec-row">
+                        <span class="spec-label">Min Benchtop Thickness</span>
+                        <span class="spec-value">20 mm</span>
+                    </div>
+                </div>
+
+                <div class="spec-category">Technical</div>
+                <div class="spec-table">
+                    <div class="spec-row">
+                        <span class="spec-label">Weight</span>
+                        <span class="spec-value">24 kg</span>
+                    </div>
+                    <div class="spec-row">
+                        <span class="spec-label">Material</span>
+                        <span class="spec-value">Duronite 423™</span>
+                    </div>
+                    <div class="spec-row">
+                        <span class="spec-label">Waste Outlet</span>
+                        <span class="spec-value">40 mm</span>
+                    </div>
+                    <div class="spec-row">
+                        <span class="spec-label">Mounting</span>
+                        <span class="spec-value">Silicone bed</span>
+                    </div>
+                    <div class="spec-row">
+                        <span class="spec-label">Capacity</span>
+                        <span class="spec-value">8 litres</span>
+                    </div>
+                </div>
+
+                <a href="#" class="download-specs">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    Download CAD + Spec Sheet
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Warranty Section -->
+<section class="warranty-section" id="warranty">
+    <div class="section-header">
+        <span class="section-number">03 — Quality Assurance</span>
+        <h2>Built to Last Decades</h2>
+    </div>
+    <div class="warranty-grid">
+        <div class="warranty-card">
+            <div class="warranty-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5">
+                    <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                </svg>
+            </div>
+            <h3>10-Year Warranty</h3>
+            <p>Full coverage against cracking, staining, and structural defects. Commercial-grade durability backed by our manufacturer guarantee.</p>
+            <div class="warranty-value">10yr</div>
+        </div>
+        <div class="warranty-card">
+            <div class="warranty-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5">
+                    <path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                </svg>
+            </div>
+            <h3>Zero Maintenance</h3>
+            <p>Duronite 423™ requires no waxing, resealing, or special treatments. Simply clean with mild soap and water for lifetime beauty.</p>
+            <div class="warranty-value">0</div>
+        </div>
+        <div class="warranty-card">
+            <div class="warranty-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5">
+                    <path d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
+                </svg>
+            </div>
+            <h3>Handcrafted Quality</h3>
+            <p>Each piece individually crafted in our Melbourne facility. Unique character with consistent quality across every basin.</p>
+            <div class="warranty-value">AU</div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer>
+    <a href="index.html" class="logo">Specifier Strategy</a>
+    <p>Precision-crafted concrete bathware for architects and designers.<br>Made in Melbourne, Australia.</p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ============================================
+// WebGPU Implementation with WebGL Fallback
+// ============================================
+
+let gpuContext = null;
+let isWebGPU = false;
+let currentColor = '#FFFFFF';
+let autoRotate = false;
+let wireframe = false;
+
+async function initWebGPU() {
+    const canvas = document.getElementById('webgpu-canvas');
+    const gpuBadge = document.querySelector('.gpu-badge');
+    const gpuStatus = document.querySelector('.gpu-status');
+
+    // Check WebGPU support
+    if (!navigator.gpu) {
+        console.log('WebGPU not supported, falling back to WebGL');
+        gpuBadge.classList.add('fallback');
+        gpuStatus.textContent = 'WebGL Fallback';
+        initWebGLFallback(canvas);
+        return;
+    }
+
+    try {
+        const adapter = await navigator.gpu.requestAdapter();
+        if (!adapter) {
+            throw new Error('No GPU adapter found');
+        }
+
+        const device = await adapter.requestDevice();
+        const context = canvas.getContext('webgpu');
+
+        const format = navigator.gpu.getPreferredCanvasFormat();
+        context.configure({
+            device: device,
+            format: format,
+            alphaMode: 'premultiplied'
+        });
+
+        isWebGPU = true;
+        gpuStatus.textContent = 'WebGPU Active';
+
+        // Store context for later use
+        gpuContext = { device, context, format, canvas };
+
+        // Start WebGPU render loop
+        renderWebGPU();
+
+    } catch (error) {
+        console.log('WebGPU initialization failed:', error);
+        gpuBadge.classList.add('fallback');
+        gpuStatus.textContent = 'WebGL Fallback';
+        initWebGLFallback(canvas);
+    }
+}
+
+function renderWebGPU() {
+    if (!gpuContext) return;
+
+    const { device, context, format, canvas } = gpuContext;
+
+    // Resize canvas
+    canvas.width = window.innerWidth * window.devicePixelRatio;
+    canvas.height = window.innerHeight * window.devicePixelRatio;
+
+    // Create shader module for animated gradient background
+    const shaderCode = `
+        struct VertexOutput {
+            @builtin(position) position: vec4f,
+            @location(0) uv: vec2f
+        }
+
+        @group(0) @binding(0) var<uniform> time: f32;
+        @group(0) @binding(1) var<uniform> color: vec3f;
+
+        @vertex
+        fn vertexMain(@builtin(vertex_index) vertexIndex: u32) -> VertexOutput {
+            var pos = array<vec2f, 6>(
+                vec2f(-1.0, -1.0),
+                vec2f(1.0, -1.0),
+                vec2f(-1.0, 1.0),
+                vec2f(-1.0, 1.0),
+                vec2f(1.0, -1.0),
+                vec2f(1.0, 1.0)
+            );
+
+            var output: VertexOutput;
+            output.position = vec4f(pos[vertexIndex], 0.0, 1.0);
+            output.uv = (pos[vertexIndex] + 1.0) / 2.0;
+            return output;
+        }
+
+        @fragment
+        fn fragmentMain(input: VertexOutput) -> @location(0) vec4f {
+            let uv = input.uv;
+
+            // Animated organic pattern
+            let t = time * 0.3;
+            let pattern1 = sin(uv.x * 8.0 + t) * cos(uv.y * 6.0 - t * 0.7);
+            let pattern2 = sin(uv.y * 10.0 - t * 0.5) * cos(uv.x * 4.0 + t * 0.3);
+            let combined = (pattern1 + pattern2) * 0.5 + 0.5;
+
+            // Warm white base
+            let baseColor = vec3f(0.99, 0.98, 0.97);
+
+            // Subtle color influence
+            let influence = combined * 0.08;
+            let finalColor = mix(baseColor, color, influence);
+
+            // Add subtle vignette
+            let vignette = 1.0 - length(uv - 0.5) * 0.3;
+
+            return vec4f(finalColor * vignette, 1.0);
+        }
+    `;
+
+    const shaderModule = device.createShaderModule({ code: shaderCode });
+
+    // Create uniform buffers
+    const timeBuffer = device.createBuffer({
+        size: 4,
+        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+    });
+
+    const colorBuffer = device.createBuffer({
+        size: 16, // vec3f needs 16 bytes due to alignment
+        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+    });
+
+    // Create bind group layout and bind group
+    const bindGroupLayout = device.createBindGroupLayout({
+        entries: [
+            { binding: 0, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'uniform' } },
+            { binding: 1, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'uniform' } }
+        ]
+    });
+
+    const bindGroup = device.createBindGroup({
+        layout: bindGroupLayout,
+        entries: [
+            { binding: 0, resource: { buffer: timeBuffer } },
+            { binding: 1, resource: { buffer: colorBuffer } }
+        ]
+    });
+
+    // Create pipeline
+    const pipelineLayout = device.createPipelineLayout({
+        bindGroupLayouts: [bindGroupLayout]
+    });
+
+    const pipeline = device.createRenderPipeline({
+        layout: pipelineLayout,
+        vertex: {
+            module: shaderModule,
+            entryPoint: 'vertexMain'
+        },
+        fragment: {
+            module: shaderModule,
+            entryPoint: 'fragmentMain',
+            targets: [{ format: format }]
+        },
+        primitive: {
+            topology: 'triangle-list'
+        }
+    });
+
+    // Animation loop
+    let startTime = performance.now();
+
+    function frame() {
+        const time = (performance.now() - startTime) / 1000;
+
+        // Update uniforms
+        device.queue.writeBuffer(timeBuffer, 0, new Float32Array([time]));
+
+        // Parse current color
+        const hex = currentColor.replace('#', '');
+        const r = parseInt(hex.substr(0, 2), 16) / 255;
+        const g = parseInt(hex.substr(2, 2), 16) / 255;
+        const b = parseInt(hex.substr(4, 2), 16) / 255;
+        device.queue.writeBuffer(colorBuffer, 0, new Float32Array([r, g, b, 1.0]));
+
+        // Render
+        const commandEncoder = device.createCommandEncoder();
+        const textureView = context.getCurrentTexture().createView();
+
+        const renderPass = commandEncoder.beginRenderPass({
+            colorAttachments: [{
+                view: textureView,
+                clearValue: { r: 0.99, g: 0.98, b: 0.97, a: 1 },
+                loadOp: 'clear',
+                storeOp: 'store'
+            }]
+        });
+
+        renderPass.setPipeline(pipeline);
+        renderPass.setBindGroup(0, bindGroup);
+        renderPass.draw(6);
+        renderPass.end();
+
+        device.queue.submit([commandEncoder.finish()]);
+
+        requestAnimationFrame(frame);
+    }
+
+    frame();
+}
+
+function initWebGLFallback(canvas) {
+    const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+    if (!gl) {
+        console.error('WebGL not supported');
+        return;
+    }
+
+    // Resize
+    function resize() {
+        canvas.width = window.innerWidth * window.devicePixelRatio;
+        canvas.height = window.innerHeight * window.devicePixelRatio;
+        gl.viewport(0, 0, canvas.width, canvas.height);
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    // Shaders
+    const vertexShaderSource = `
+        attribute vec2 a_position;
+        varying vec2 v_uv;
+        void main() {
+            gl_Position = vec4(a_position, 0.0, 1.0);
+            v_uv = (a_position + 1.0) / 2.0;
+        }
+    `;
+
+    const fragmentShaderSource = `
+        precision highp float;
+        varying vec2 v_uv;
+        uniform float u_time;
+        uniform vec3 u_color;
+
+        void main() {
+            vec2 uv = v_uv;
+            float t = u_time * 0.3;
+            float pattern1 = sin(uv.x * 8.0 + t) * cos(uv.y * 6.0 - t * 0.7);
+            float pattern2 = sin(uv.y * 10.0 - t * 0.5) * cos(uv.x * 4.0 + t * 0.3);
+            float combined = (pattern1 + pattern2) * 0.5 + 0.5;
+
+            vec3 baseColor = vec3(0.99, 0.98, 0.97);
+            float influence = combined * 0.08;
+            vec3 finalColor = mix(baseColor, u_color, influence);
+
+            float vignette = 1.0 - length(uv - 0.5) * 0.3;
+            gl_FragColor = vec4(finalColor * vignette, 1.0);
+        }
+    `;
+
+    function createShader(gl, type, source) {
+        const shader = gl.createShader(type);
+        gl.shaderSource(shader, source);
+        gl.compileShader(shader);
+        return shader;
+    }
+
+    const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
+    const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
+
+    const program = gl.createProgram();
+    gl.attachShader(program, vertexShader);
+    gl.attachShader(program, fragmentShader);
+    gl.linkProgram(program);
+    gl.useProgram(program);
+
+    // Geometry
+    const positions = new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]);
+    const buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
+
+    const positionLoc = gl.getAttribLocation(program, 'a_position');
+    gl.enableVertexAttribArray(positionLoc);
+    gl.vertexAttribPointer(positionLoc, 2, gl.FLOAT, false, 0, 0);
+
+    const timeLoc = gl.getUniformLocation(program, 'u_time');
+    const colorLoc = gl.getUniformLocation(program, 'u_color');
+
+    let startTime = performance.now();
+
+    function render() {
+        const time = (performance.now() - startTime) / 1000;
+        gl.uniform1f(timeLoc, time);
+
+        const hex = currentColor.replace('#', '');
+        const r = parseInt(hex.substr(0, 2), 16) / 255;
+        const g = parseInt(hex.substr(2, 2), 16) / 255;
+        const b = parseInt(hex.substr(4, 2), 16) / 255;
+        gl.uniform3f(colorLoc, r, g, b);
+
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+        requestAnimationFrame(render);
+    }
+
+    render();
+}
+
+// ============================================
+// ============================================
+// 3D Basin Viewer (Three.js)
+// ============================================
+
+let basinScene, basinCamera, basinRenderer, basinMesh;
+let basinAutoRotate = true;
+let isDragging = false;
+let previousMousePosition = { x: 0, y: 0 };
+let basinRotation = { x: 0, y: 0 };
+
+function init3DBasinViewer() {
+    const container = document.getElementById('product-viewer');
+    const canvas = document.getElementById('basin-3d-canvas');
+
+    if (!canvas || !container) return;
+
+    // Scene setup
+    basinScene = new THREE.Scene();
+    basinScene.background = null; // Transparent to show gradient
+
+    // Camera - positioned to center on basin
+    const aspect = container.clientWidth / container.clientHeight;
+    basinCamera = new THREE.PerspectiveCamera(32, aspect, 0.1, 1000);
+    basinCamera.position.set(0, 0.8, 5.5);
+    basinCamera.lookAt(0, 0.5, 0);
+
+    // Renderer
+    basinRenderer = new THREE.WebGLRenderer({
+        canvas: canvas,
+        antialias: true,
+        alpha: true
+    });
+    basinRenderer.setSize(container.clientWidth, container.clientHeight);
+    basinRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    basinRenderer.shadowMap.enabled = true;
+    basinRenderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    basinScene.add(ambientLight);
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    directionalLight.position.set(5, 10, 7);
+    directionalLight.castShadow = true;
+    basinScene.add(directionalLight);
+
+    const fillLight = new THREE.DirectionalLight(0xC4A484, 0.3);
+    fillLight.position.set(-5, 3, -5);
+    basinScene.add(fillLight);
+
+    const rimLight = new THREE.DirectionalLight(0xffffff, 0.4);
+    rimLight.position.set(0, -5, -5);
+    basinScene.add(rimLight);
+
+    // Create basin geometry (Tondo - round pedestal)
+    createBasinMesh();
+
+    // Floor/shadow plane
+    const floorGeometry = new THREE.PlaneGeometry(10, 10);
+    const floorMaterial = new THREE.ShadowMaterial({ opacity: 0.15 });
+    const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.y = -1.65;
+    floor.receiveShadow = true;
+    basinScene.add(floor);
+
+    // Mouse/touch interactions
+    canvas.addEventListener('mousedown', onMouseDown);
+    canvas.addEventListener('mousemove', onMouseMove);
+    canvas.addEventListener('mouseup', onMouseUp);
+    canvas.addEventListener('mouseleave', onMouseUp);
+    canvas.addEventListener('wheel', onWheel);
+
+    // Touch support
+    canvas.addEventListener('touchstart', onTouchStart, { passive: false });
+    canvas.addEventListener('touchmove', onTouchMove, { passive: false });
+    canvas.addEventListener('touchend', onTouchEnd);
+
+    // Resize handler
+    window.addEventListener('resize', onBasinResize);
+
+    // Start animation
+    animateBasin();
+}
+
+let currentProductType = 'tondo';
+
+function createBasinMesh(color = '#FFFFFF', productType = 'tondo') {
+    // Remove existing mesh
+    if (basinMesh) {
+        basinScene.remove(basinMesh);
+    }
+
+    currentProductType = productType;
+    const group = new THREE.Group();
+    const basinColor = new THREE.Color(color);
+
+    // Material - concrete-like
+    const basinMaterial = new THREE.MeshStandardMaterial({
+        color: basinColor,
+        roughness: 0.65,
+        metalness: 0.02,
+        envMapIntensity: 0.3
+    });
+
+    // Drain materials
+    const drainMaterial = new THREE.MeshStandardMaterial({
+        color: 0x555555, roughness: 0.2, metalness: 0.9
+    });
+    const drainHoleMaterial = new THREE.MeshStandardMaterial({
+        color: 0x1a1a1a, roughness: 0.5, metalness: 0.3
+    });
+
+    let drainY = 0;
+    let groupY = 0;
+
+    switch(productType) {
+        case 'tondo':
+            // Round pedestal basin
+            const tondoPoints = [];
+            tondoPoints.push(new THREE.Vector2(0.001, 0));
+            tondoPoints.push(new THREE.Vector2(0.5, 0));
+            tondoPoints.push(new THREE.Vector2(0.52, 0.04));
+            tondoPoints.push(new THREE.Vector2(0.5, 0.08));
+            tondoPoints.push(new THREE.Vector2(0.46, 0.2));
+            tondoPoints.push(new THREE.Vector2(0.38, 0.6));
+            tondoPoints.push(new THREE.Vector2(0.32, 1.2));
+            tondoPoints.push(new THREE.Vector2(0.30, 1.8));
+            tondoPoints.push(new THREE.Vector2(0.30, 2.3));
+            tondoPoints.push(new THREE.Vector2(0.34, 2.6));
+            tondoPoints.push(new THREE.Vector2(0.45, 2.85));
+            tondoPoints.push(new THREE.Vector2(0.62, 3.05));
+            tondoPoints.push(new THREE.Vector2(0.78, 3.18));
+            tondoPoints.push(new THREE.Vector2(0.88, 3.25));
+            tondoPoints.push(new THREE.Vector2(0.92, 3.28));
+            tondoPoints.push(new THREE.Vector2(0.90, 3.32));
+            tondoPoints.push(new THREE.Vector2(0.85, 3.30));
+            tondoPoints.push(new THREE.Vector2(0.75, 3.22));
+            tondoPoints.push(new THREE.Vector2(0.58, 3.08));
+            tondoPoints.push(new THREE.Vector2(0.40, 2.96));
+            tondoPoints.push(new THREE.Vector2(0.22, 2.88));
+            tondoPoints.push(new THREE.Vector2(0.10, 2.85));
+            tondoPoints.push(new THREE.Vector2(0.001, 2.84));
+            const tondoGeo = new THREE.LatheGeometry(tondoPoints, 80);
+            const tondo = new THREE.Mesh(tondoGeo, basinMaterial);
+            tondo.castShadow = true;
+            tondo.receiveShadow = true;
+            group.add(tondo);
+            drainY = 2.86;
+            groupY = -1.65;
+            break;
+
+        case 'ovale':
+            // Oval pedestal - wider, more voluminous
+            const ovalePoints = [];
+            ovalePoints.push(new THREE.Vector2(0.001, 0));
+            ovalePoints.push(new THREE.Vector2(0.55, 0));
+            ovalePoints.push(new THREE.Vector2(0.58, 0.05));
+            ovalePoints.push(new THREE.Vector2(0.55, 0.1));
+            ovalePoints.push(new THREE.Vector2(0.50, 0.25));
+            ovalePoints.push(new THREE.Vector2(0.42, 0.7));
+            ovalePoints.push(new THREE.Vector2(0.36, 1.3));
+            ovalePoints.push(new THREE.Vector2(0.34, 1.9));
+            ovalePoints.push(new THREE.Vector2(0.35, 2.4));
+            ovalePoints.push(new THREE.Vector2(0.42, 2.7));
+            ovalePoints.push(new THREE.Vector2(0.58, 2.95));
+            ovalePoints.push(new THREE.Vector2(0.78, 3.12));
+            ovalePoints.push(new THREE.Vector2(0.95, 3.22));
+            ovalePoints.push(new THREE.Vector2(1.05, 3.28));
+            ovalePoints.push(new THREE.Vector2(1.08, 3.32));
+            ovalePoints.push(new THREE.Vector2(1.05, 3.36));
+            ovalePoints.push(new THREE.Vector2(0.98, 3.34));
+            ovalePoints.push(new THREE.Vector2(0.85, 3.26));
+            ovalePoints.push(new THREE.Vector2(0.68, 3.12));
+            ovalePoints.push(new THREE.Vector2(0.48, 3.0));
+            ovalePoints.push(new THREE.Vector2(0.28, 2.92));
+            ovalePoints.push(new THREE.Vector2(0.12, 2.88));
+            ovalePoints.push(new THREE.Vector2(0.001, 2.86));
+            const ovaleGeo = new THREE.LatheGeometry(ovalePoints, 80);
+            // Scale to make it oval
+            ovaleGeo.scale(1, 1, 0.7);
+            const ovale = new THREE.Mesh(ovaleGeo, basinMaterial);
+            ovale.castShadow = true;
+            ovale.receiveShadow = true;
+            group.add(ovale);
+            drainY = 2.88;
+            groupY = -1.7;
+            break;
+
+        case 'fuse':
+            // Cubist/angular pedestal - geometric shapes
+            // Base
+            const fuseBase = new THREE.Mesh(
+                new THREE.BoxGeometry(0.9, 0.1, 0.72),
+                basinMaterial
+            );
+            fuseBase.position.y = 0.05;
+            fuseBase.castShadow = true;
+            group.add(fuseBase);
+
+            // Pedestal column - angular taper
+            const fuseColumnGeo = new THREE.BufferGeometry();
+            const w1 = 0.45, d1 = 0.36; // bottom
+            const w2 = 0.35, d2 = 0.28; // middle
+            const w3 = 0.50, d3 = 0.40; // top
+            const h1 = 0.1, h2 = 1.8, h3 = 2.6;
+
+            // Create tapered box using vertices
+            const fuseColumn = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.32, 0.42, 2.4, 4, 1),
+                basinMaterial
+            );
+            fuseColumn.rotation.y = Math.PI / 4;
+            fuseColumn.position.y = 1.3;
+            fuseColumn.castShadow = true;
+            group.add(fuseColumn);
+
+            // Bowl - angular/rectangular with rounded interior
+            const fuseBowlOuter = new THREE.Mesh(
+                new THREE.BoxGeometry(1.0, 0.45, 0.8),
+                basinMaterial
+            );
+            fuseBowlOuter.position.y = 2.75;
+            fuseBowlOuter.castShadow = true;
+            group.add(fuseBowlOuter);
+
+            // Bowl interior (subtracted look - darker inset)
+            const fuseBowlInner = new THREE.Mesh(
+                new THREE.BoxGeometry(0.82, 0.35, 0.62),
+                new THREE.MeshStandardMaterial({ color: basinColor.clone().multiplyScalar(0.92), roughness: 0.7, metalness: 0.02 })
+            );
+            fuseBowlInner.position.y = 2.82;
+            group.add(fuseBowlInner);
+
+            drainY = 2.65;
+            groupY = -1.4;
+            break;
+
+        case 'capsule':
+            // Countertop oval vessel
+            const capsulePoints = [];
+            capsulePoints.push(new THREE.Vector2(0.001, 0));
+            capsulePoints.push(new THREE.Vector2(0.95, 0));
+            capsulePoints.push(new THREE.Vector2(1.0, 0.05));
+            capsulePoints.push(new THREE.Vector2(1.02, 0.15));
+            capsulePoints.push(new THREE.Vector2(1.0, 0.35));
+            capsulePoints.push(new THREE.Vector2(0.95, 0.48));
+            capsulePoints.push(new THREE.Vector2(0.92, 0.52));
+            capsulePoints.push(new THREE.Vector2(0.88, 0.50));
+            capsulePoints.push(new THREE.Vector2(0.78, 0.42));
+            capsulePoints.push(new THREE.Vector2(0.60, 0.30));
+            capsulePoints.push(new THREE.Vector2(0.40, 0.20));
+            capsulePoints.push(new THREE.Vector2(0.20, 0.14));
+            capsulePoints.push(new THREE.Vector2(0.001, 0.12));
+            const capsuleGeo = new THREE.LatheGeometry(capsulePoints, 64);
+            capsuleGeo.scale(1, 1, 0.65); // Make it oval
+            const capsule = new THREE.Mesh(capsuleGeo, basinMaterial);
+            capsule.castShadow = true;
+            capsule.receiveShadow = true;
+            group.add(capsule);
+            drainY = 0.14;
+            groupY = -0.25;
+            break;
+
+        case 'bowl':
+            // Round countertop bowl
+            const bowlPoints = [];
+            bowlPoints.push(new THREE.Vector2(0.001, 0));
+            bowlPoints.push(new THREE.Vector2(0.85, 0));
+            bowlPoints.push(new THREE.Vector2(0.88, 0.04));
+            bowlPoints.push(new THREE.Vector2(0.90, 0.15));
+            bowlPoints.push(new THREE.Vector2(0.88, 0.32));
+            bowlPoints.push(new THREE.Vector2(0.82, 0.42));
+            bowlPoints.push(new THREE.Vector2(0.78, 0.46));
+            bowlPoints.push(new THREE.Vector2(0.74, 0.44));
+            bowlPoints.push(new THREE.Vector2(0.65, 0.36));
+            bowlPoints.push(new THREE.Vector2(0.50, 0.24));
+            bowlPoints.push(new THREE.Vector2(0.32, 0.14));
+            bowlPoints.push(new THREE.Vector2(0.15, 0.08));
+            bowlPoints.push(new THREE.Vector2(0.001, 0.06));
+            const bowlGeo = new THREE.LatheGeometry(bowlPoints, 64);
+            const bowlMesh = new THREE.Mesh(bowlGeo, basinMaterial);
+            bowlMesh.castShadow = true;
+            bowlMesh.receiveShadow = true;
+            group.add(bowlMesh);
+            drainY = 0.08;
+            groupY = -0.22;
+            break;
+
+        case 'noah':
+            // Wall-hung basin
+            // Back plate (mounts to wall)
+            const backPlate = new THREE.Mesh(
+                new THREE.BoxGeometry(1.1, 0.08, 0.5),
+                basinMaterial
+            );
+            backPlate.position.set(0, 0.5, -0.25);
+            backPlate.castShadow = true;
+            group.add(backPlate);
+
+            // Basin body - organic curve projecting from wall
+            const noahPoints = [];
+            noahPoints.push(new THREE.Vector2(0.001, 0));
+            noahPoints.push(new THREE.Vector2(0.90, 0));
+            noahPoints.push(new THREE.Vector2(0.95, 0.08));
+            noahPoints.push(new THREE.Vector2(0.92, 0.25));
+            noahPoints.push(new THREE.Vector2(0.85, 0.38));
+            noahPoints.push(new THREE.Vector2(0.80, 0.44));
+            noahPoints.push(new THREE.Vector2(0.75, 0.42));
+            noahPoints.push(new THREE.Vector2(0.62, 0.32));
+            noahPoints.push(new THREE.Vector2(0.45, 0.20));
+            noahPoints.push(new THREE.Vector2(0.25, 0.12));
+            noahPoints.push(new THREE.Vector2(0.001, 0.10));
+            const noahGeo = new THREE.LatheGeometry(noahPoints, 64);
+            noahGeo.scale(1, 1, 0.72);
+            const noahBasin = new THREE.Mesh(noahGeo, basinMaterial);
+            noahBasin.position.z = 0.15;
+            noahBasin.castShadow = true;
+            noahBasin.receiveShadow = true;
+            group.add(noahBasin);
+
+            // Wall indicator (background plane)
+            const wallPlane = new THREE.Mesh(
+                new THREE.PlaneGeometry(3, 2.5),
+                new THREE.MeshStandardMaterial({ color: 0xE8E4DF, roughness: 0.9 })
+            );
+            wallPlane.position.z = -0.52;
+            wallPlane.position.y = 0.5;
+            wallPlane.receiveShadow = true;
+            group.add(wallPlane);
+
+            drainY = 0.12;
+            groupY = -0.2;
+            break;
+    }
+
+    // Add drain for all types
+    if (productType !== 'fuse') {
+        const drainRing = new THREE.Mesh(
+            new THREE.TorusGeometry(0.09, 0.02, 16, 32),
+            drainMaterial
+        );
+        drainRing.rotation.x = Math.PI / 2;
+        drainRing.position.y = drainY;
+        if (productType === 'noah') drainRing.position.z = 0.15;
+        group.add(drainRing);
+
+        const drainHole = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.07, 0.07, 0.05, 32),
+            drainHoleMaterial
+        );
+        drainHole.position.y = drainY - 0.04;
+        if (productType === 'noah') drainHole.position.z = 0.15;
+        group.add(drainHole);
+    } else {
+        // Fuse drain (rectangular)
+        const fuseDrain = new THREE.Mesh(
+            new THREE.BoxGeometry(0.15, 0.04, 0.15),
+            drainHoleMaterial
+        );
+        fuseDrain.position.y = drainY;
+        group.add(fuseDrain);
+    }
+
+    group.position.y = groupY;
+    basinMesh = group;
+    basinScene.add(basinMesh);
+}
+
+function onMouseDown(e) {
+    isDragging = true;
+    basinAutoRotate = false;
+    previousMousePosition = { x: e.clientX, y: e.clientY };
+}
+
+function onMouseMove(e) {
+    if (!isDragging) return;
+
+    const deltaMove = {
+        x: e.clientX - previousMousePosition.x,
+        y: e.clientY - previousMousePosition.y
+    };
+
+    basinRotation.y += deltaMove.x * 0.01;
+    basinRotation.x += deltaMove.y * 0.005;
+    basinRotation.x = Math.max(-0.5, Math.min(0.5, basinRotation.x));
+
+    previousMousePosition = { x: e.clientX, y: e.clientY };
+}
+
+function onMouseUp() {
+    isDragging = false;
+}
+
+function onWheel(e) {
+    e.preventDefault();
+    basinCamera.position.z += e.deltaY * 0.008;
+    basinCamera.position.z = Math.max(2, Math.min(12, basinCamera.position.z));
+}
+
+function onTouchStart(e) {
+    if (e.touches.length === 1) {
+        isDragging = true;
+        basinAutoRotate = false;
+        previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    }
+}
+
+function onTouchMove(e) {
+    if (!isDragging || e.touches.length !== 1) return;
+    e.preventDefault();
+
+    const deltaMove = {
+        x: e.touches[0].clientX - previousMousePosition.x,
+        y: e.touches[0].clientY - previousMousePosition.y
+    };
+
+    basinRotation.y += deltaMove.x * 0.01;
+    basinRotation.x += deltaMove.y * 0.005;
+    basinRotation.x = Math.max(-0.5, Math.min(0.5, basinRotation.x));
+
+    previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+}
+
+function onTouchEnd() {
+    isDragging = false;
+}
+
+function onBasinResize() {
+    const container = document.getElementById('product-viewer');
+    if (!container || !basinCamera || !basinRenderer) return;
+
+    basinCamera.aspect = container.clientWidth / container.clientHeight;
+    basinCamera.updateProjectionMatrix();
+    basinRenderer.setSize(container.clientWidth, container.clientHeight);
+}
+
+function animateBasin() {
+    requestAnimationFrame(animateBasin);
+
+    if (basinMesh) {
+        if (basinAutoRotate) {
+            basinRotation.y += 0.003;
+        }
+        basinMesh.rotation.y = basinRotation.y;
+        basinMesh.rotation.x = basinRotation.x;
+    }
+
+    if (basinRenderer && basinScene && basinCamera) {
+        basinRenderer.render(basinScene, basinCamera);
+    }
+}
+
+// ============================================
+// UI Interactions
+// ============================================
+
+// Loading screen
+window.addEventListener('load', () => {
+    setTimeout(() => {
+        document.querySelector('.loader').style.opacity = '0';
+        setTimeout(() => {
+            document.querySelector('.loader').style.display = 'none';
+        }, 500);
+    }, 1800);
+
+    initWebGPU();
+    init3DBasinViewer();
+});
+
+// Custom cursor
+const cursor = document.querySelector('.cursor');
+document.addEventListener('mousemove', (e) => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top = e.clientY + 'px';
+});
+
+document.querySelectorAll('a, button, .color-swatch, .product-card').forEach(el => {
+    el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+    el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+});
+
+// Color selector
+document.querySelectorAll('.color-swatch').forEach(swatch => {
+    swatch.addEventListener('click', () => {
+        document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+        swatch.classList.add('active');
+
+        const colorName = swatch.dataset.name;
+        const colorCode = swatch.dataset.color;
+        currentColor = colorCode;
+
+        document.querySelector('.selected-color-name').textContent = colorName;
+        document.querySelector('.selected-color-code').textContent = colorCode;
+
+        // Update 3D basin color
+        if (basinScene) {
+            createBasinMesh(colorCode);
+        }
+    });
+});
+
+// Viewer controls
+document.querySelectorAll('.viewer-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const action = btn.dataset.action;
+        if (action === 'rotate') {
+            basinAutoRotate = !basinAutoRotate;
+            btn.style.background = basinAutoRotate ? 'var(--terracotta)' : 'var(--warm-white)';
+            btn.style.color = basinAutoRotate ? 'var(--warm-white)' : 'var(--charcoal)';
+        }
+        if (action === 'wireframe') {
+            wireframe = !wireframe;
+            if (basinMesh) {
+                basinMesh.traverse((child) => {
+                    if (child.isMesh && child.material) {
+                        child.material.wireframe = wireframe;
+                    }
+                });
+            }
+            btn.style.background = wireframe ? 'var(--terracotta)' : 'var(--warm-white)';
+            btn.style.color = wireframe ? 'var(--warm-white)' : 'var(--charcoal)';
+        }
+        if (action === 'reset') {
+            basinAutoRotate = true;
+            wireframe = false;
+            basinRotation = { x: 0, y: 0 };
+            if (basinCamera) {
+                basinCamera.position.set(0, 0.8, 5.5);
+            }
+            if (basinMesh) {
+                basinMesh.traverse((child) => {
+                    if (child.isMesh && child.material) {
+                        child.material.wireframe = false;
+                    }
+                });
+            }
+            // Reset button styles
+            document.querySelectorAll('.viewer-btn').forEach(b => {
+                b.style.background = 'var(--warm-white)';
+                b.style.color = 'var(--charcoal)';
+            });
+        }
+    });
+});
+
+// Product card click handlers - switch 3D model
+const productNames = {
+    tondo: 'Tondo',
+    ovale: 'Ovale',
+    fuse: 'Fuse',
+    capsule: 'Capsule',
+    bowl: 'Bowl',
+    noah: 'Noah'
+};
+
+document.querySelectorAll('.product-card').forEach(card => {
+    card.addEventListener('click', (e) => {
+        // Don't trigger if clicking buttons
+        if (e.target.closest('.btn-primary, .btn-secondary')) return;
+
+        const productType = card.dataset.product;
+        if (productType && productType !== currentProductType) {
+            // Update 3D model
+            createBasinMesh(currentColor, productType);
+
+            // Update viewer label
+            const nameLabel = document.querySelector('.product-name-label');
+            if (nameLabel) {
+                nameLabel.textContent = productNames[productType] || productType;
+            }
+
+            // Highlight active card
+            document.querySelectorAll('.product-card').forEach(c => c.style.outline = 'none');
+            card.style.outline = '2px solid var(--terracotta)';
+
+            // Update product tabs
+            document.querySelectorAll('.product-tab').forEach(t => t.classList.remove('active'));
+            const matchingTab = document.querySelector(`.product-tab[data-product="${productType}"]`);
+            if (matchingTab) matchingTab.classList.add('active');
+
+            // Scroll to viewer
+            document.getElementById('product-viewer').scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            // Reset rotation for new model
+            basinRotation = { x: 0, y: 0 };
+            basinAutoRotate = true;
+        }
+    });
+
+    // Add hover cursor style
+    card.style.cursor = 'pointer';
+});
+
+// Product tab selector (in viewer) - switch 3D model
+document.querySelectorAll('.product-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        const productType = tab.dataset.product;
+        if (productType && productType !== currentProductType) {
+            // Update 3D model
+            createBasinMesh(currentColor, productType);
+
+            // Update viewer label
+            const nameLabel = document.querySelector('.product-name-label');
+            if (nameLabel) {
+                nameLabel.textContent = productNames[productType] || productType;
+            }
+
+            // Update active tab
+            document.querySelectorAll('.product-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+
+            // Also update product card highlight
+            document.querySelectorAll('.product-card').forEach(c => c.style.outline = 'none');
+            const matchingCard = document.querySelector(`.product-card[data-product="${productType}"]`);
+            if (matchingCard) {
+                matchingCard.style.outline = '2px solid var(--terracotta)';
+            }
+
+            // Reset rotation for new model
+            basinRotation = { x: 0, y: 0 };
+            basinAutoRotate = true;
+        }
+    });
+});
+
+// Smooth scroll for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    });
+});
+
+// Resize handler
+window.addEventListener('resize', () => {
+    const canvas = document.getElementById('webgpu-canvas');
+    if (canvas && gpuContext) {
+        canvas.width = window.innerWidth * window.devicePixelRatio;
+        canvas.height = window.innerHeight * window.devicePixelRatio;
+    }
+});
+</script>
+
+</body>
+</html>
