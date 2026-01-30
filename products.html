@@ -2368,14 +2368,14 @@ function init3DBasinViewer() {
 
 let currentProductType = 'tondo';
 
-// Optimal camera settings for each product type
+// Optimal camera settings for each product type (zoomed out for better view)
 const cameraSettings = {
-    tondo:   { y: 0.7, z: 5.2, lookY: 0.5 },
-    ovale:   { y: 0.7, z: 5.8, lookY: 0.5 },
-    fuse:    { y: 0.8, z: 5.0, lookY: 0.6 },
-    capsule: { y: 0.3, z: 3.0, lookY: 0.1 },
-    bowl:    { y: 0.25, z: 2.8, lookY: 0.05 },
-    noah:    { y: 0.3, z: 3.2, lookY: 0.15 }
+    tondo:   { y: 1.0, z: 8.5, lookY: 0.4 },
+    ovale:   { y: 1.0, z: 9.0, lookY: 0.4 },
+    fuse:    { y: 1.0, z: 8.0, lookY: 0.5 },
+    capsule: { y: 0.4, z: 5.0, lookY: 0.0 },
+    bowl:    { y: 0.4, z: 4.5, lookY: 0.0 },
+    noah:    { y: 0.4, z: 5.5, lookY: 0.1 }
 };
 
 function updateCameraForProduct(productType) {
